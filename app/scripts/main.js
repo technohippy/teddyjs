@@ -36,7 +36,7 @@ Teddy.getPointIndex = function(x, y, z) {
   return Teddy.points.length - 1;
 };
 
-Teddy.Skeleton = function() {
+Teddy.Body = function() {
   this.bones = [];
 
   // TODO: terminal, sleeve, junctionはtriangleのタイプでした...
@@ -45,11 +45,11 @@ Teddy.Skeleton = function() {
   this.junctionBones = []; // no external edges
 };
 
-Teddy.Skeleton.prototype.addBone = function(bone) {
+Teddy.Body.prototype.addBone = function(bone) {
   this.bones.push(bone);
 };
 
-Teddy.Skeleton.prototype.classifyBones = function() {
+Teddy.Body.prototype.classifyBones = function() {
   this.bones.forEach(function(bone) {
     if (bone.isTerminal()) {
       this.terminalBones.push(bone);
@@ -63,15 +63,79 @@ Teddy.Skeleton.prototype.classifyBones = function() {
   }, this);
 };
 
-Teddy.Skeleton.prototype.drawBones = function(scene) {
-  this.terminalBones.forEach(function(bone) {
-    addLine(scene, bone.joint1.getPoint(), bone.joint2.getPoint());
+Teddy.Body.prototype.prunBones = function() {
+  var prunedBones = [];
+  this.terminalBones.forEach(function(tBone) {
+    var checkPoints = [];
+    var linkNodeIds = tBone.triangles[0].links[0];
+    var linkPointIds = linkNodeIds.map(function(id) {return tBone.triangles[0].triangle[id]});
+    var linkPoints = linkPointIds.map(function(id) {return Teddy.points[id]});
+    var center = new THREE.Vector3(
+      (linkPoints[0].x + linkPoints[1].x) / 2,
+      (linkPoints[0].y + linkPoints[1].y) / 2,
+      (linkPoints[0].z + linkPoints[1].z) / 2
+    );
+    var distance = center.distanceTo(linkPoints[0]);
+    var pointIds = tBone.getAllPointIdsWithoutIds(linkPointIds);
+    for (var i = 0; i < pointIds.length; i++) {
+      var point = Teddy.points[pointIds[i]];
+      // いきなり分割
+      if (distance < center.distanceTo(point)) {
+        prunedBones.push(tBone);
+        var joint = tBone.joint1.isTerminal() ? tBone.joint2 : tBone.joint1;
+        // TODO: 順序を調節
+        joint.addTriangle(pointIds[0], linkPointIds[0], Teddy.getPointIndex(center));
+        joint.addTriangle(pointIds[0], Teddy.getPointIndex(center), linkPointIds[1]);
+        return;
+      }
+    }
+
+
   });
+
+  var prunedBoneIds = prunedBones.map(function(bone) {
+    return this.bones.indexOf(bone);
+  }, this).sort().reverse();
+  prunedBoneIds.forEach(function(id) {
+    this.bones.splice(id, 1);
+  }, this);
+};
+
+Teddy.Body.prototype.drawSkins = function(scene) {
+  this.bones.forEach(function(bone) {
+    var type =
+      bone.isTerminal() ? 't' :
+      bone.isSleeve() ? 's' :
+      bone.isJunction() ? 'j' : '';
+    bone.triangles.forEach(function(triangle) {
+      displayTriangle(scene, triangle['triangle'], type);
+    });
+    bone.joint1.triangles.forEach(function(triangle) {
+      displayTriangle(scene, triangle, type);
+    });
+    bone.joint2.triangles.forEach(function(triangle) {
+      displayTriangle(scene, triangle, type);
+    });
+  });
+
+  /*
   this.sleeveBones.forEach(function(bone) {
-    addLine(scene, bone.joint1.getPoint(), bone.joint2.getPoint());
+    bone.triangles.forEach(function(triangle) {
+      displayTriangle(scene, triangle['triangle'], 's');
+    });
   });
+
   this.junctionBones.forEach(function(bone) {
-    addLine(scene, bone.joint1.getPoint(), bone.joint2.getPoint());
+    bone.triangles.forEach(function(triangle) {
+      displayTriangle(scene, triangle['triangle'], 'j');
+    });
+  });
+  */
+};
+
+Teddy.Body.prototype.drawBones = function(scene) {
+  this.bones.forEach(function(bone) {
+    displayLine(scene, bone.joint1.getPoint(), bone.joint2.getPoint());
   });
 };
 
@@ -85,6 +149,7 @@ Teddy.Bone = function(joint1, joint2) {
   this.joint1.addBone(this);
   this.joint2 = joint2;
   this.joint2.addBone(this);
+  this.triangles = [];
 };
 
 Teddy.Bone.prototype.nextJoint = function(joint) {
@@ -103,6 +168,26 @@ Teddy.Bone.prototype.isJunction = function() {
   return this.joint1.isJunction() || this.joint2.isJunction();
 };
 
+Teddy.Bone.prototype.addTriangle = function(triangle) {
+  this.triangles.push(triangle);
+};
+
+Teddy.Bone.prototype.getAllPointIds = function() {
+  return this.getAllPointIdsWithoutIds([]);
+};
+
+Teddy.Bone.prototype.getAllPointIdsWithoutIds = function(ids) {
+  var ret = [];
+  this.triangles.forEach(function(triangle) {
+    triangle.triangle.forEach(function(pointIndex) {
+      if (ret.indexOf(pointIndex) < 0 && ids.indexOf(pointIndex) < 0) {
+        ret.push(pointIndex);
+      }
+    });
+  });
+  return ret;
+};
+
 Teddy.Joints = [];
 
 Teddy.getJoint = function(index) {
@@ -118,6 +203,7 @@ Teddy.getJoint = function(index) {
 Teddy.Joint = function(index) {
   this.pointIndex = index;
   this.bones = [];
+  this.triangles = [];
 };
 
 Teddy.Joint.prototype.getPoint = function() {
@@ -148,6 +234,10 @@ Teddy.Joint.prototype.isJunction = function() {
   return this.bones.length == 3;
 };
 
+Teddy.Joint.prototype.addTriangle = function(x, y, z) {
+  this.triangles.push([x, y, z]);
+};
+
 
 
 
@@ -169,13 +259,23 @@ function getTriangleType(i, j, k) {
   }
 }
 
-function addLine(scene, p1, p2) {
+function displayLine(scene, p1, p2) {
   var geometry = new THREE.Geometry();
   geometry.vertices.push(p1);
   geometry.vertices.push(p2);
   var line = new THREE.Line(geometry, new THREE.LineBasicMaterial({color: 0xff0000}));
   scene.add(line);
 }
+
+function displayTriangle(scene, triangle, materialType) {
+  var geometry = new THREE.Geometry();
+  geometry.vertices.push(Teddy.points[triangle[0]]);
+  geometry.vertices.push(Teddy.points[triangle[1]]);
+  geometry.vertices.push(Teddy.points[triangle[2]]);
+  geometry.faces.push(new THREE.Face3(0, 1, 2));
+  var mesh = new THREE.Mesh(geometry, materials[materialType]);
+  scene.add(mesh);
+};
 
 function triangulate(contour, useShapeUtil) {
   if (useShapeUtil) {
@@ -224,13 +324,12 @@ var ambient = new THREE.AmbientLight(0x333333);
 scene.add(ambient);
 
 var materials = {
-  t: new THREE.MeshBasicMaterial({color: 0xffccff, ambient:0xffffff}),
-  s: new THREE.MeshBasicMaterial({color: 0xffffff, ambient:0xffffff}),
-  j: new THREE.MeshBasicMaterial({color: 0xffcccc, ambient:0xffffff})
+  t: new THREE.MeshBasicMaterial({color: 0xffffcc, ambient:0xffffff, wireframe:true}),
+  s: new THREE.MeshBasicMaterial({color: 0xffffff, ambient:0xffffff, wireframe:true}),
+  j: new THREE.MeshBasicMaterial({color: 0xffcccc, ambient:0xffffff, wireframe:true})
 };
 
-var skeleton = new Teddy.Skeleton();
-var tTriangles = [];
+var teddy = new Teddy.Body();
 triangles.forEach(function(triangle) {
   var t0 = triangle[0];
   var t1 = triangle[1];
@@ -244,73 +343,59 @@ triangles.forEach(function(triangle) {
   var c012 = new THREE.Vector3((p0.x + p1.x + p2.x) / 3, (p0.y + p1.y + p2.y) / 3, 0.001);
 
   var triangleType = getTriangleType(t0, t1, t2);
-  var geometry = new THREE.Geometry();
-  geometry.vertices.push(p0);
-  geometry.vertices.push(p1);
-  geometry.vertices.push(p2);
-  geometry.faces.push(new THREE.Face3(0, 1, 2));
-  var material = materials[triangleType.type];
-  var mesh = new THREE.Mesh(geometry, material);
-  mesh.userData['triangleType'] = triangleType;
-  mesh.userData['triangle'] = triangle;
-  mesh.userData['neighbors'] = []; // TODO
-  scene.add(mesh);
-
-  if (triangleType.type == 't') tTriangles.push(mesh);
 
   switch (triangleType.type) {
     case 't':
-      tTriangles.push(mesh);
       if (triangleType.edges.toString() == '0,1,1,2') {
-        skeleton.addBone(new Teddy.Bone(p1, c20));
+        var bone = new Teddy.Bone(p1, c20);
+        bone.addTriangle({triangle:triangle, edges:triangleType.edges, links:[[2,0]]});
+        teddy.addBone(bone);
       }
       else if (triangleType.edges.toString() == '1,2,2,0') {
-        skeleton.addBone(new Teddy.Bone(p2, c01));
+        var bone = new Teddy.Bone(p2, c01);
+        bone.addTriangle({triangle:triangle, edges:triangleType.edges, links:[[0,1]]});
+        teddy.addBone(bone);
       }
       else if (triangleType.edges.toString() == '0,1,2,0') {
-        skeleton.addBone(new Teddy.Bone(p0, c12));
+        var bone = new Teddy.Bone(p0, c12);
+        bone.addTriangle({triangle:triangle, edges:triangleType.edges, links:[[1,2]]});
+        teddy.addBone(bone);
       }
       break;
     case 's':
       if (triangleType.edges.toString() == '0,1') {
-        skeleton.addBone(new Teddy.Bone(c12, c20));
+        var bone = new Teddy.Bone(c12, c20);
+        bone.addTriangle({triangle:triangle, edges:triangleType.edges, links:[[1,2], [2,0]]});
+        teddy.addBone(bone);
       }
       else if (triangleType.edges.toString() == '1,2') {
-        skeleton.addBone(new Teddy.Bone(c20, c01));
+        var bone = new Teddy.Bone(c20, c01);
+        bone.addTriangle({triangle:triangle, edges:triangleType.edges, links:[[2,0], [0,1]]});
+        teddy.addBone(bone);
       }
       else if (triangleType.edges.toString() == '2,0') {
-        skeleton.addBone(new Teddy.Bone(c01, c12));
+        var bone = new Teddy.Bone(c01, c12);
+        bone.addTriangle({triangle:triangle, edges:triangleType.edges, links:[[0,1], [1,2]]});
+        teddy.addBone(bone);
       }
       break;
     case 'j':
-      skeleton.addBone(new Teddy.Bone(c01, c012));
-      skeleton.addBone(new Teddy.Bone(c12, c012));
-      skeleton.addBone(new Teddy.Bone(c20, c012));
+      var bone1 = new Teddy.Bone(c01, c012);
+      bone1.addTriangle({triangle:triangle, edges:triangleType.edges, links:[[0,1], [1,2], [2,0]]});
+      teddy.addBone(bone1);
+      var bone2 = new Teddy.Bone(c12, c012);
+      bone2.addTriangle({triangle:triangle, edges:triangleType.edges, links:[[0,1], [1,2], [2,0]]});
+      teddy.addBone(bone2);
+      var bone3 = new Teddy.Bone(c20, c012);
+      bone3.addTriangle({triangle:triangle, edges:triangleType.edges, links:[[0,1], [1,2], [2,0]]});
+      teddy.addBone(bone3);
       break;
   }
 });
 
-skeleton.classifyBones();
-skeleton.drawBones(scene);
-
-tTriangles.forEach(function(mesh) {
-  var edge = mesh.userData['triangleType'].edges[0];
-  var e1 = Teddy.points[edge[0]];
-  var e2 = Teddy.points[edge[1]];
-  var triangle = mesh.userData['triangle'];
-});
-
-var geometry = new THREE.Geometry();
-Teddy.points.forEach(function(point) {
-  var p = point.clone();
-  p.z += 0.001;
-  geometry.vertices.push(p);
-});
-triangles.forEach(function(triangle) {
-  geometry.faces.push(new THREE.Face3(triangle[0], triangle[1], triangle[2]));
-});
-var material = new THREE.MeshPhongMaterial({color: 0xffffff, ambient:0xffffff, wireframe:true});
-var mesh = new THREE.Mesh(geometry, material);
-scene.add(mesh);
+teddy.classifyBones();
+teddy.prunBones();
+teddy.drawSkins(scene);
+teddy.drawBones(scene);
 
 renderer.render(scene, camera);
