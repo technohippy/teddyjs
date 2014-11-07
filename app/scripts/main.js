@@ -1,5 +1,7 @@
 var Teddy = Teddy || {};
 
+Teddy.DIST_THRESHOLD = 0.001;
+
 Teddy.points = [
   new THREE.Vector3(0, 0, 0),
   new THREE.Vector3(0.5, 1, 0),
@@ -30,7 +32,7 @@ Teddy.isOutline = function(i, j) {
 Teddy.getPointIndex = function(x, y, z) {
   var v = typeof y === 'undefined' ? x : new THREE.Vector3(x, y, z);
   for (var i = 0; i < Teddy.points.length; i++) {
-    if (Teddy.points[i].equals(v)) return i;
+    if (Teddy.points[i].distanceTo(v) < Teddy.DIST_THRESHOLD) return i;
   }
   Teddy.points.push(v);
   return Teddy.points.length - 1;
@@ -38,65 +40,108 @@ Teddy.getPointIndex = function(x, y, z) {
 
 Teddy.Body = function() {
   this.bones = [];
-
-  // TODO: terminal, sleeve, junctionはtriangleのタイプでした...
-  this.terminalBones = []; // two external edges
-  this.sleeveBones = [];   // one external edge
-  this.junctionBones = []; // no external edges
 };
 
 Teddy.Body.prototype.addBone = function(bone) {
   this.bones.push(bone);
 };
 
-Teddy.Body.prototype.classifyBones = function() {
-  this.bones.forEach(function(bone) {
-    if (bone.isTerminal()) {
-      this.terminalBones.push(bone);
-    }
-    else if (bone.isJunction()) {
-      this.junctionBones.push(bone);
-    }
-    else if (bone.isSleeve()) {
-      this.sleeveBones.push(bone);
-    }
-  }, this);
-};
-
 Teddy.Body.prototype.prunBones = function() {
   var prunedBones = [];
-  this.terminalBones.forEach(function(tBone) {
-    var checkPoints = [];
-    var linkNodeIds = tBone.triangles[0].links[0];
-    var linkPointIds = linkNodeIds.map(function(id) {return tBone.triangles[0].triangle[id]});
-    var linkPoints = linkPointIds.map(function(id) {return Teddy.points[id]});
-    var center = new THREE.Vector3(
-      (linkPoints[0].x + linkPoints[1].x) / 2,
-      (linkPoints[0].y + linkPoints[1].y) / 2,
-      (linkPoints[0].z + linkPoints[1].z) / 2
-    );
-    var distance = center.distanceTo(linkPoints[0]);
-    var pointIds = tBone.getAllPointIdsWithoutIds(linkPointIds);
-    for (var i = 0; i < pointIds.length; i++) {
-      var point = Teddy.points[pointIds[i]];
-      // いきなり分割
-      if (distance < center.distanceTo(point)) {
-        prunedBones.push(tBone);
-        var joint = tBone.joint1.isTerminal() ? tBone.joint2 : tBone.joint1;
-        // TODO: 順序を調節
-        joint.addTriangle(pointIds[0], linkPointIds[0], Teddy.getPointIndex(center));
-        joint.addTriangle(pointIds[0], Teddy.getPointIndex(center), linkPointIds[1]);
+  this.bones.forEach(function(tBone) {
+    if (!tBone.isTerminal()) return;
+
+    var currentBone = tBone;
+    var currentJoint = currentBone.joint1.isTerminal() ? currentBone.joint1 : currentBone.joint2;
+    var checkPointIds = [];
+    do {
+      prunedBones.push(currentBone);
+      currentJoint = currentBone.getNextJoint(currentJoint);
+
+      var linkPointIds = currentBone.getEdgeIdsIncluding(currentJoint.getPoint());
+      var linkPoints = linkPointIds.map(function(id) {return Teddy.points[id]});
+//displayPoint(scene, currentJoint.getPoint(), 0xffff00, 0.0022);
+//displayLine(scene, linkPoints[0], linkPoints[1], 0x00ff00, 0.002);
+      var center = currentJoint.getPoint();
+//displayLine(scene, linkPoints[0], center, 0x00ffff, 0.0022);
+//displayLine(scene, linkPoints[1], center, 0x00ffff, 0.0022);
+      var distance = center.distanceTo(linkPoints[0]);
+      currentBone.getAllPointIdsWithoutIds(linkPointIds).forEach(function(pointId) {
+        checkPointIds.push(pointId);
+      });
+      for (var i = 0; i < checkPointIds.length; i++) {
+        var point = Teddy.points[checkPointIds[i]];
+        if (distance < center.distanceTo(point)) {
+          checkPointIds.push(linkPointIds[0]);
+          checkPointIds.push(linkPointIds[1]);
+          checkPointIds = checkPointIds.sort(function(a, b) {
+            return a === b ? 0 : a < b ? -1 : 1;
+          });
+          var cursor = checkPointIds.shift();
+          for (var i = 0; i < checkPointIds.length + 1; i++) {
+            checkPointIds.push(cursor);
+            if (checkPointIds[0] === cursor + 1) {
+              cursor = checkPointIds.shift();
+            }
+            else {
+              break;
+            }
+          }
+          for (var i = 1; i < checkPointIds.length; i++) {
+            currentJoint.addTriangle(
+              checkPointIds[i-1],
+              checkPointIds[i],
+              Teddy.getPointIndex(center)
+            );
+          }
+          return;
+        }
+      }
+
+      currentBone = currentJoint.getBonesExcept(currentBone)[0];
+
+      if (currentBone.isJunction()) {
+        // TODO: need refactoring
+        prunedBones.push(currentBone);
+        linkPointIds.forEach(function(id) { checkPointIds.push(id); });
+        currentJoint = currentBone.getNextJoint(currentJoint);
+        var center = currentJoint.getPoint();
+        checkPointIds = checkPointIds.sort(function(a, b) {
+          return a === b ? 0 : a < b ? -1 : 1;
+        });
+        var cursor = checkPointIds.shift();
+        for (var i = 0; i < checkPointIds.length + 1; i++) {
+          checkPointIds.push(cursor);
+          if (checkPointIds[0] === cursor + 1) {
+            cursor = checkPointIds.shift();
+          }
+          else {
+            break;
+          }
+        }
+        for (var i = 1; i < checkPointIds.length; i++) {
+          currentJoint.addTriangle(
+            checkPointIds[i-1],
+            checkPointIds[i],
+            Teddy.getPointIndex(center)
+          );
+        }
         return;
       }
-    }
-
-
+      else if (currentBone.isSleeve()) {
+        // go next
+      }
+      else if (currentBone.isTerminal()) {
+        throw 'ERROR: cannot handle this geometry';
+      }
+    } while (typeof currentBone !== 'undefined'); 
   });
 
-  var prunedBoneIds = prunedBones.map(function(bone) {
+  prunedBones.map(function(bone) {
     return this.bones.indexOf(bone);
-  }, this).sort().reverse();
-  prunedBoneIds.forEach(function(id) {
+  }, this).sort(function(a, b) {
+    return a === b ? 0 : a < b ? 1 : -1
+  }).forEach(function(id) {
     this.bones.splice(id, 1);
   }, this);
 };
@@ -152,8 +197,29 @@ Teddy.Bone = function(joint1, joint2) {
   this.triangles = [];
 };
 
-Teddy.Bone.prototype.nextJoint = function(joint) {
-  return this.joint1 == joint ? this.joint2 : this.joint1;
+Teddy.Bone.prototype.getEdgeIdsIncluding = function(point) {
+  var ret = [];
+  this.triangles.forEach(function(triangle) {
+    var pointIds = triangle.triangle;
+    [[0,1], [1,2], [2,0]].forEach(function(edgeIds) {
+      var pi1 = pointIds[edgeIds[0]];
+      var pi2 = pointIds[edgeIds[1]];
+      var p1 = Teddy.points[pi1];
+      var p2 = Teddy.points[pi2];
+      var center = p1.clone().add(p2).multiplyScalar(0.5);
+      if (center.distanceTo(point) < 0.01) {
+        ret.push(pi1);
+        ret.push(pi2);
+        return;
+      }
+    });
+  });
+  return ret;
+};
+
+Teddy.Bone.prototype.getNextJoint = function(joint) {
+  //return this.joint1.isNear(joint) ? this.joint2 : this.joint1;
+  return this.joint1 === joint ? this.joint2 : this.joint1;
 };
 
 Teddy.Bone.prototype.isTerminal = function() {
@@ -188,6 +254,23 @@ Teddy.Bone.prototype.getAllPointIdsWithoutIds = function(ids) {
   return ret;
 };
 
+Teddy.Bone.prototype.isEqual = function(that) {
+  var thisJ1 = typeof this.joint1 === 'undefined' ? -1 : this.joint1.pointIndex;
+  var thisJ2 = typeof this.joint2 === 'undefined' ? -1 : this.joint2.pointIndex;
+  var thatJ1 = typeof that.joint1 === 'undefined' ? -1 : that.joint1.pointIndex;
+  var thatJ2 = typeof that.joint2 === 'undefined' ? -1 : that.joint2.pointIndex;
+
+  return (thisJ1 === thatJ1 && thisJ2 === thatJ2)
+      || (thisJ1 === thatJ2 && thisJ2 === thatJ1);
+};
+
+Teddy.Bone.prototype.toString = function() {
+  var thisJ1 = typeof this.joint1 === 'undefined' ? -1 : this.joint1.pointIndex;
+  var thisJ2 = typeof this.joint2 === 'undefined' ? -1 : this.joint2.pointIndex;
+
+  return '' + thisJ1 + ',' + thisJ2;
+};
+
 Teddy.Joints = [];
 
 Teddy.getJoint = function(index) {
@@ -217,25 +300,29 @@ Teddy.Joint.prototype.addBone = function(bone) {
 Teddy.Joint.prototype.getBonesExcept = function(bone) {
   var ret = [];
   this.bones.forEach(function(b) {
-    if (b != bone) ret.push(bone);
+    if (!b.isEqual(bone)) ret.push(b);
   });
   return ret;
 };
 
 Teddy.Joint.prototype.isTerminal = function() {
-  return this.bones.length == 1;
+  return this.bones.length === 1;
 };
 
 Teddy.Joint.prototype.isSleeve = function() {
-  return this.bones.length == 2;
+  return this.bones.length === 2;
 };
 
 Teddy.Joint.prototype.isJunction = function() {
-  return this.bones.length == 3;
+  return this.bones.length === 3;
 };
 
 Teddy.Joint.prototype.addTriangle = function(x, y, z) {
   this.triangles.push([x, y, z]);
+};
+
+Teddy.Joint.prototype.isNear = function(joint) {
+  return this.getPoint().distanceTo(joint.getPoint()) < Teddy.DIST_THRESHOLD;
 };
 
 
@@ -259,12 +346,41 @@ function getTriangleType(i, j, k) {
   }
 }
 
-function displayLine(scene, p1, p2) {
+function displayLine(scene, p1, p2, color, z) {
+  if (typeof color === 'undefined') color = 0xff0000;
+  if (typeof z !== 'undefined') {
+    p1 = p1.clone();
+    p1.z = z;
+    p2 = p2.clone();
+    p2.z = z;
+  }
   var geometry = new THREE.Geometry();
   geometry.vertices.push(p1);
   geometry.vertices.push(p2);
-  var line = new THREE.Line(geometry, new THREE.LineBasicMaterial({color: 0xff0000}));
+  var line = new THREE.Line(geometry, new THREE.LineBasicMaterial({color: color}));
   scene.add(line);
+}
+
+function displayPoint(scene, p, color, z) {
+  var dx = Math.random()/5;
+  dx = 0.1;
+  var p1 = p.clone();
+  p1.z = z;
+  var p2 = p.clone();
+  p2.x -= dx;
+  p2.y -= 0.1;
+  p2.z = z;
+  var p3 = p.clone();
+  p3.x -= dx;
+  p3.y += 0.1;
+  p3.z = z;
+  var geometry = new THREE.Geometry();
+  geometry.vertices.push(p1);
+  geometry.vertices.push(p2);
+  geometry.vertices.push(p3);
+  geometry.faces.push(new THREE.Face3(0, 1, 2));
+  var mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({color:color, ambient:0xffff, wireframe:true}));
+  scene.add(mesh);
 }
 
 function displayTriangle(scene, triangle, materialType) {
@@ -393,7 +509,6 @@ triangles.forEach(function(triangle) {
   }
 });
 
-teddy.classifyBones();
 teddy.prunBones();
 teddy.drawSkins(scene);
 teddy.drawBones(scene);
