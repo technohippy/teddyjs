@@ -25,8 +25,8 @@ Teddy.points = [
 
 Teddy.outlineSize = Teddy.points.length;
 
-Teddy.isOutline = function(i, j) {
-  return (Math.abs(i - j) == 1) || (Math.abs(i - j) == Teddy.outlineSize - 1);
+Teddy.isOutline = function(pointId1, pointId2) {
+  return (Math.abs(pointId1 - pointId2) == 1) || (Math.abs(pointId1 - pointId2) == Teddy.outlineSize - 1);
 };
 
 Teddy.getPointIndex = function(x, y, z) {
@@ -144,6 +144,29 @@ Teddy.Body.prototype.prunBones = function() {
   }).forEach(function(id) {
     this.bones.splice(id, 1);
   }, this);
+
+  this.bones.forEach(function(bone) {
+    var triangle = bone.triangles[0].triangle;
+    bone.triangles = [];
+    if (Teddy.isOutline(triangle[0], triangle[1])) {
+      bone.joint1.addTriangle(triangle[0], triangle[1], bone.joint1.pointIndex);
+      bone.triangles.push({triangle:[triangle[0], bone.joint1.pointIndex, bone.joint2.pointIndex]});
+      bone.triangles.push({triangle:[triangle[2], bone.joint1.pointIndex, bone.joint2.pointIndex]});
+    }
+    else if (Teddy.isOutline(triangle[1], triangle[2])) {
+      bone.joint1.addTriangle(triangle[1], triangle[2], bone.joint1.pointIndex);
+      bone.triangles.push({triangle:[triangle[2], bone.joint1.pointIndex, bone.joint2.pointIndex]});
+      bone.triangles.push({triangle:[triangle[0], bone.joint1.pointIndex, bone.joint2.pointIndex]});
+    }
+    else if (Teddy.isOutline(triangle[2], triangle[0])) {
+      bone.joint1.addTriangle(triangle[2], triangle[0], bone.joint1.pointIndex);
+      bone.triangles.push({triangle:[triangle[2], bone.joint1.pointIndex, bone.joint2.pointIndex]});
+      bone.triangles.push({triangle:[triangle[1], bone.joint1.pointIndex, bone.joint2.pointIndex]});
+    }
+    else {
+      // junction
+    }
+  });
 };
 
 Teddy.Body.prototype.drawSkins = function(scene) {
@@ -162,25 +185,11 @@ Teddy.Body.prototype.drawSkins = function(scene) {
       displayTriangle(scene, triangle, type);
     });
   });
-
-  /*
-  this.sleeveBones.forEach(function(bone) {
-    bone.triangles.forEach(function(triangle) {
-      displayTriangle(scene, triangle['triangle'], 's');
-    });
-  });
-
-  this.junctionBones.forEach(function(bone) {
-    bone.triangles.forEach(function(triangle) {
-      displayTriangle(scene, triangle['triangle'], 'j');
-    });
-  });
-  */
 };
 
 Teddy.Body.prototype.drawBones = function(scene) {
   this.bones.forEach(function(bone) {
-    displayLine(scene, bone.joint1.getPoint(), bone.joint2.getPoint());
+    displayLine(scene, bone.joint1.getPoint(), bone.joint2.getPoint(), 0xff0000, 0.2);
   });
 };
 
