@@ -148,23 +148,50 @@ Teddy.Body.prototype.prunBones = function() {
   this.bones.forEach(function(bone) {
     var triangle = bone.triangles[0].triangle;
     bone.triangles = [];
-    if (Teddy.isOutline(triangle[0], triangle[1])) {
-      bone.joint1.addTriangle(triangle[0], triangle[1], bone.joint1.pointIndex);
-      bone.triangles.push({triangle:[triangle[0], bone.joint1.pointIndex, bone.joint2.pointIndex]});
-      bone.triangles.push({triangle:[triangle[2], bone.joint1.pointIndex, bone.joint2.pointIndex]});
-    }
-    else if (Teddy.isOutline(triangle[1], triangle[2])) {
-      bone.joint1.addTriangle(triangle[1], triangle[2], bone.joint1.pointIndex);
-      bone.triangles.push({triangle:[triangle[2], bone.joint1.pointIndex, bone.joint2.pointIndex]});
-      bone.triangles.push({triangle:[triangle[0], bone.joint1.pointIndex, bone.joint2.pointIndex]});
-    }
-    else if (Teddy.isOutline(triangle[2], triangle[0])) {
-      bone.joint1.addTriangle(triangle[2], triangle[0], bone.joint1.pointIndex);
-      bone.triangles.push({triangle:[triangle[2], bone.joint1.pointIndex, bone.joint2.pointIndex]});
-      bone.triangles.push({triangle:[triangle[1], bone.joint1.pointIndex, bone.joint2.pointIndex]});
-    }
-    else {
+    var isJunction = true;
+    [[0, 1, 2], [1, 2, 0], [2, 0, 1]].forEach(function(ijk) {
+      var i = ijk[0], j = ijk[1], k = ijk[2];
+      if (Teddy.isOutline(triangle[i], triangle[j])) {
+        isJunction = false;
+        bone.joint1.addTriangle(triangle[i], triangle[j], bone.joint1.pointIndex);
+        bone.triangles.push({triangle:[triangle[i], bone.joint1.pointIndex, bone.joint2.pointIndex]});
+        bone.triangles.push({triangle:[triangle[k], bone.joint1.pointIndex, bone.joint2.pointIndex]});
+        return;
+      }
+    });
+    if (isJunction) {
       // junction
+      var p0 = Teddy.points[triangle[0]];
+      var p1 = Teddy.points[triangle[1]];
+      var p2 = Teddy.points[triangle[2]];
+      var center = new THREE.Vector3(
+        (p0.x + p1.x + p2.x) / 3,
+        (p0.y + p1.y + p2.y) / 3,
+        (p0.z + p1.z + p2.z) / 3
+      );
+      var jp1 = bone.joint1.getPoint();
+      var jp2 = bone.joint2.getPoint();
+      var joints = jp1.distanceTo(center) < jp2.distanceTo(center) ? [bone.joint2, bone.joint1] : [bone.joint1, bone.joint2];
+      var edgeJoint = joints[0];
+      var centerJoint = joints[1];
+      var l01 = p0.clone().add(p1).multiplyScalar(0.5).distanceTo(edgeJoint.getPoint());
+      var l12 = p1.clone().add(p2).multiplyScalar(0.5).distanceTo(edgeJoint.getPoint());
+      var l20 = p2.clone().add(p0).multiplyScalar(0.5).distanceTo(edgeJoint.getPoint());
+      if (l01 <= l12 && l01 <= l20) {
+        bone.triangles.push({triangle:[triangle[0], edgeJoint.pointIndex, centerJoint.pointIndex]});
+        bone.triangles.push({triangle:[triangle[1], edgeJoint.pointIndex, centerJoint.pointIndex]});
+      }
+      else if (l12 <= l01 && l12 <= l20) {
+        bone.triangles.push({triangle:[triangle[1], edgeJoint.pointIndex, centerJoint.pointIndex]});
+        bone.triangles.push({triangle:[triangle[2], edgeJoint.pointIndex, centerJoint.pointIndex]});
+      }
+      else if (l20 <= l01 && l20 <= l12) {
+        bone.triangles.push({triangle:[triangle[2], edgeJoint.pointIndex, centerJoint.pointIndex]});
+        bone.triangles.push({triangle:[triangle[0], edgeJoint.pointIndex, centerJoint.pointIndex]});
+      }
+      else {
+        throw 'never reach';
+      }
     }
   });
 };
