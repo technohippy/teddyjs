@@ -38,6 +38,21 @@ Teddy.getPointIndex = function(x, y, z) {
   return Teddy.points.length - 1;
 };
 
+Teddy.makeClockwise = function(triangle) {
+  var p0 = Teddy.points[triangle[0]];
+  var p1 = Teddy.points[triangle[1]];
+  var p2 = Teddy.points[triangle[2]];
+
+  var v01 = p1.clone().sub(p0);
+  var v02 = p2.clone().sub(p0);
+  if (v01.dot(v02) > 0) {
+    return [triangle[0], triangle[2], triangle[1]];
+  }
+  else {
+    return triangle;
+  }
+};
+
 Teddy.Body = function() {
   this.bones = [];
 };
@@ -60,11 +75,7 @@ Teddy.Body.prototype.prunBones = function() {
 
       var linkPointIds = currentBone.getEdgeIdsIncluding(currentJoint.getPoint());
       var linkPoints = linkPointIds.map(function(id) {return Teddy.points[id]});
-//displayPoint(scene, currentJoint.getPoint(), 0xffff00, 0.0022);
-//displayLine(scene, linkPoints[0], linkPoints[1], 0x00ff00, 0.002);
       var center = currentJoint.getPoint();
-//displayLine(scene, linkPoints[0], center, 0x00ffff, 0.0022);
-//displayLine(scene, linkPoints[1], center, 0x00ffff, 0.0022);
       var distance = center.distanceTo(linkPoints[0]);
       currentBone.getAllPointIdsWithoutIds(linkPointIds).forEach(function(pointId) {
         checkPointIds.push(pointId);
@@ -194,6 +205,9 @@ Teddy.Body.prototype.prunBones = function() {
       }
     }
   });
+};
+
+Teddy.Body.prototype.elevateSpines = function() {
 };
 
 Teddy.Body.prototype.drawSkins = function(scene) {
@@ -420,6 +434,8 @@ function displayPoint(scene, p, color, z) {
 }
 
 function displayTriangle(scene, triangle, materialType) {
+  triangle = Teddy.makeClockwise(triangle); // TODO: おかしい？
+
   var geometry = new THREE.Geometry();
   geometry.vertices.push(Teddy.points[triangle[0]]);
   geometry.vertices.push(Teddy.points[triangle[1]]);
@@ -479,6 +495,11 @@ var materials = {
   t: new THREE.MeshBasicMaterial({color: 0xffffcc, ambient:0xffffff, wireframe:true}),
   s: new THREE.MeshBasicMaterial({color: 0xffffff, ambient:0xffffff, wireframe:true}),
   j: new THREE.MeshBasicMaterial({color: 0xffcccc, ambient:0xffffff, wireframe:true})
+/*
+  t: new THREE.MeshBasicMaterial({color: 0xffffcc, ambient:0xffffff, side:THREE.DoubleSide}),
+  s: new THREE.MeshBasicMaterial({color: 0xffffff, ambient:0xffffff, side:THREE.DoubleSide}),
+  j: new THREE.MeshBasicMaterial({color: 0xffcccc, ambient:0xffffff, side:THREE.DoubleSide})
+*/
 };
 
 var teddy = new Teddy.Body();
@@ -489,10 +510,10 @@ triangles.forEach(function(triangle) {
   var p0 = Teddy.points[t0];
   var p1 = Teddy.points[t1];
   var p2 = Teddy.points[t2];
-  var c01 = new THREE.Vector3((p0.x + p1.x) / 2, (p0.y + p1.y) / 2, 0.001);
-  var c12 = new THREE.Vector3((p1.x + p2.x) / 2, (p1.y + p2.y) / 2, 0.001);
-  var c20 = new THREE.Vector3((p2.x + p0.x) / 2, (p2.y + p0.y) / 2, 0.001);
-  var c012 = new THREE.Vector3((p0.x + p1.x + p2.x) / 3, (p0.y + p1.y + p2.y) / 3, 0.001);
+  var c01 = new THREE.Vector3((p0.x + p1.x) / 2, (p0.y + p1.y) / 2, 0);
+  var c12 = new THREE.Vector3((p1.x + p2.x) / 2, (p1.y + p2.y) / 2, 0);
+  var c20 = new THREE.Vector3((p2.x + p0.x) / 2, (p2.y + p0.y) / 2, 0);
+  var c012 = new THREE.Vector3((p0.x + p1.x + p2.x) / 3, (p0.y + p1.y + p2.y) / 3, 0);
 
   var triangleType = getTriangleType(t0, t1, t2);
 
@@ -546,6 +567,7 @@ triangles.forEach(function(triangle) {
 });
 
 teddy.prunBones();
+teddy.elevateSpines();
 teddy.drawSkins(scene);
 teddy.drawBones(scene);
 
