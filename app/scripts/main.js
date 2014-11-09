@@ -710,12 +710,9 @@ teddy.sewSkins();
 teddy.drawSkins(scene);
 //teddy.drawSpines(scene);
 
-var controls = new THREE.FlyControls(camera);
-controls.movementSpeed = 1000;
-controls.rollSpeed = Math.PI / 24;
-var clock = new THREE.Clock();    
+var controls = new THREE.OrbitControls(camera);
 function render() {
-//  controls.update(clock.getDelta()); 
+  controls.update(); 
   requestAnimationFrame(render);
   renderer.render(scene, camera);
 };
