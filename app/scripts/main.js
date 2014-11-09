@@ -215,6 +215,104 @@ Teddy.Body.prototype.elevateSpines = function() {
   }, this);
 };
 
+Teddy.Body.prototype.sewSkins = function() {
+  this.spines.forEach(function(spine) {
+    var newSpineTriangles = [];
+    spine.triangles.forEach(function(triangle) {
+      this.sewTriangle(triangle['triangle'], newSpineTriangles);
+    }, this);
+    spine.triangles = newSpineTriangles.map(function(item) {
+      return {triangle:item};
+    });
+
+    if (!spine.joint1.triangulated) {
+      var newJoint1Triangles = [];
+      spine.joint1.triangles.forEach(function(triangle) {
+        this.sewTriangle(triangle, newJoint1Triangles);
+      }, this);
+      spine.joint1.triangles = newJoint1Triangles;
+      spine.joint1.triangulated = true;
+    }
+
+    if (!spine.joint2.triangulated) {
+      var newJoint2Triangles = [];
+      spine.joint2.triangles.forEach(function(triangle) {
+        this.sewTriangle(triangle, newJoint2Triangles);
+      }, this);
+      spine.joint2.triangles = newJoint2Triangles;
+      spine.joint2.triangulated = true;
+    }
+  }, this);
+};
+
+Teddy.Body.prototype.sewTriangle = function(triangle, bag) {
+  var p0 = Teddy.points[triangle[0]];
+  var p1 = Teddy.points[triangle[1]];
+  var p2 = Teddy.points[triangle[2]];
+  var highs = [];
+  var lows = [];
+  p0.z === 0 ? lows.push(p0) : highs.push(p0);
+  p1.z === 0 ? lows.push(p1) : highs.push(p1);
+  p2.z === 0 ? lows.push(p2) : highs.push(p2);
+
+  var points1 = [];
+  var highPoint = highs[0];
+  var lowPoint = lows[0];
+  var height = highPoint.z;
+  var projectedSlope = lowPoint.clone().sub(highPoint.clone().setZ(lowPoint.z));
+  var width = projectedSlope.length();
+  for (var deg = 0; deg <= 90; deg += 10) {
+    var rad = deg / 180 * Math.PI;
+    var l = width * Math.cos(rad);
+    var h = height * Math.sin(rad);
+    points1.push(new THREE.Vector3(
+      highPoint.x + l/width*projectedSlope.x,
+      highPoint.y + l/width*projectedSlope.y,
+      h
+    ));
+  }
+
+  var points2 = [];
+  highPoint = highs[highs.length - 1];
+  lowPoint = lows[lows.length - 1];
+  height = highPoint.z;
+  projectedSlope = lowPoint.clone().sub(highPoint.clone().setZ(lowPoint.z));
+  width = projectedSlope.length();
+  for (deg = 0; deg <= 90; deg += 10) {
+    rad = deg / 180 * Math.PI;
+    l = width * Math.cos(rad);
+    h = height * Math.sin(rad);
+    points2.push(new THREE.Vector3(
+      highPoint.x + l/width*projectedSlope.x,
+      highPoint.y + l/width*projectedSlope.y,
+      h
+    ));
+  }
+
+  if (points1[0].distanceTo(points2[0]) < 0.0001) {
+    points1 = points1.reverse();
+    points2 = points2.reverse();
+  }
+  var point = [];
+  point.push(Teddy.getPointIndex(points1.pop()));
+  points2.pop(); // throw away
+  point.push(Teddy.getPointIndex(points1[points1.length - 1]));
+  point.push(Teddy.getPointIndex(points2[points2.length - 1]));
+  bag.push(point);
+  for (var i = 1; i < points1.length; i++) {
+    bag.push([
+      Teddy.getPointIndex(points1[i-1]),
+      Teddy.getPointIndex(points2[i-1]),
+      Teddy.getPointIndex(points1[i])
+    ]);
+    bag.push([
+      Teddy.getPointIndex(points2[i-1]),
+      Teddy.getPointIndex(points2[i]),
+      Teddy.getPointIndex(points1[i])
+    ]);
+  }
+};
+
 Teddy.Body.prototype.drawSkins = function(scene) {
   this.spines.forEach(function(spine) {
     var type =
@@ -223,13 +321,13 @@ Teddy.Body.prototype.drawSkins = function(scene) {
       spine.isJunction() ? 'j' : '';
     spine.triangles.forEach(function(triangle) {
       displayTriangle(scene, triangle['triangle'], type);
-    });
+    }, this);
     spine.joint1.triangles.forEach(function(triangle) {
       displayTriangle(scene, triangle, type);
-    });
+    }, this);
     spine.joint2.triangles.forEach(function(triangle) {
       displayTriangle(scene, triangle, type);
-    });
+    }, this);
   }, this);
 };
 
@@ -348,6 +446,7 @@ Teddy.Joint = function(index) {
   this.spines = [];
   this.triangles = [];
   this.elevated = false;
+  this.triangulated = false;
 };
 
 Teddy.Joint.prototype.getPoint = function() {
@@ -529,20 +628,16 @@ camera.position.z = 8;
 scene.add(camera);
 
 var light = new THREE.DirectionalLight(0xffffff);
-light.position.set(1, 1, 1);
+light.position.set(1, 0.5, 1);
 scene.add(light);
 var ambient = new THREE.AmbientLight(0x333333);
 scene.add(ambient);
 
+var wireframe = false;
 var materials = {
-/*
-  t: new THREE.MeshBasicMaterial({color: 0xffffcc, ambient:0xffffff, wireframe:true}),
-  s: new THREE.MeshBasicMaterial({color: 0xffffff, ambient:0xffffff, wireframe:true}),
-  j: new THREE.MeshBasicMaterial({color: 0xffcccc, ambient:0xffffff, wireframe:true})
-*/
-  t: new THREE.MeshPhongMaterial({color: 0xffffcc, side:THREE.DoubleSide}),
-  s: new THREE.MeshPhongMaterial({color: 0xffffff, side:THREE.DoubleSide}),
-  j: new THREE.MeshPhongMaterial({color: 0xffcccc, side:THREE.DoubleSide})
+  t: new THREE.MeshPhongMaterial({color: 0xffffcc, side:THREE.DoubleSide, wireframe:wireframe}),
+  s: new THREE.MeshPhongMaterial({color: 0xffffff, side:THREE.DoubleSide, wireframe:wireframe}),
+  j: new THREE.MeshPhongMaterial({color: 0xffcccc, side:THREE.DoubleSide, wireframe:wireframe})
 };
 
 var teddy = new Teddy.Body();
@@ -611,6 +706,7 @@ triangles.forEach(function(triangle) {
 
 teddy.prunSpines();
 teddy.elevateSpines();
+teddy.sewSkins();
 teddy.drawSkins(scene);
 //teddy.drawSpines(scene);
 
