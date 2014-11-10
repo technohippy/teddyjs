@@ -57,6 +57,7 @@ Teddy.makeClockwise = function(triangle) {
 
 Teddy.Body = function() {
   this.spines = [];
+  this.mesh = undefined;
 };
 
 Teddy.Body.prototype.addSpine = function(spine) {
@@ -320,6 +321,34 @@ Teddy.Body.prototype.sewTriangle = function(triangle, bag) {
   }
 };
 
+Teddy.Body.prototype.buildMesh = function() {
+  var geometry = new THREE.Geometry();
+  Teddy.points.forEach(function(point) {
+    geometry.vertices.push(point);
+  }, this);
+
+  this.spines.forEach(function(spine) {
+    spine.triangles.forEach(function(triangle) {
+      geometry.faces.push(new THREE.Face3(triangle[0], triangle[1], triangle[2]));
+    }, this);
+    spine.joint1.triangles.forEach(function(triangle) {
+      geometry.faces.push(new THREE.Face3(triangle[0], triangle[1], triangle[2]));
+    }, this);
+    spine.joint2.triangles.forEach(function(triangle) {
+      geometry.faces.push(new THREE.Face3(triangle[0], triangle[1], triangle[2]));
+    }, this);
+  }, this);
+  geometry.computeFaceNormals();
+//  geometry.computeVertexNormals();
+
+  this.mesh = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial({color: 0xffffff, side:THREE.DoubleSide, wireframe:wireframe}));
+};
+
+Teddy.Body.prototype.getMesh = function() {
+  if (!this.mesh) this.buildMesh();
+  return this.mesh;
+};
+
 Teddy.Body.prototype.drawSkins = function(scene) {
   this.spines.forEach(function(spine) {
     var type =
@@ -327,7 +356,6 @@ Teddy.Body.prototype.drawSkins = function(scene) {
       spine.isSleeve() ? 's' :
       spine.isJunction() ? 'j' : '';
     spine.triangles.forEach(function(triangle) {
-//      displayTriangle(scene, triangle['triangle'], type);
       displayTriangle(scene, triangle, type);
     }, this);
     spine.joint1.triangles.forEach(function(triangle) {
@@ -773,8 +801,7 @@ triangles.forEach(function(triangle) {
 teddy.prunSpines();
 teddy.elevateSpines();
 teddy.sewSkins();
-teddy.drawSkins(scene);
-//teddy.drawSpines(scene);
+scene.add(teddy.getMesh());
 
 var controls = new THREE.OrbitControls(camera);
 function render() {
