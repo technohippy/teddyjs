@@ -40,14 +40,14 @@ Teddy.getPointIndex = function(x, y, z) {
   return Teddy.points.length - 1;
 };
 
-Teddy.makeClockwise = function(triangle) {
+Teddy.makeCCW = function(triangle, frontside) {
   var p0 = Teddy.points[triangle[0]];
   var p1 = Teddy.points[triangle[1]];
   var p2 = Teddy.points[triangle[2]];
 
   var v01 = p1.clone().sub(p0);
   var v02 = p2.clone().sub(p0);
-  if (v01.dot(v02) > 0) {
+  if ((frontside && v01.cross(v02).z < 0) || (!frontside && v01.cross(v02).z > 0)) {
     return [triangle[0], triangle[2], triangle[1]];
   }
   else {
@@ -220,20 +220,20 @@ Teddy.Body.prototype.sewSkins = function() {
   this.spines.forEach(function(spine) {
     var newSpineTriangles = [];
     spine.elevatedTriangles.forEach(function(triangle) {
-      this.sewTriangle(triangle, newSpineTriangles);
+      this.sewTriangle(triangle, newSpineTriangles, true);
     }, this);
     spine.droppedTriangles.forEach(function(triangle) {
-      this.sewTriangle(triangle, newSpineTriangles);
+      this.sewTriangle(triangle, newSpineTriangles, false);
     }, this);
     spine.triangles = newSpineTriangles;
 
     if (!spine.joint1.triangulated) {
       var newJoint1Triangles = [];
       spine.joint1.elevatedTriangles.forEach(function(triangle) {
-        this.sewTriangle(triangle, newJoint1Triangles);
+        this.sewTriangle(triangle, newJoint1Triangles, true);
       }, this);
       spine.joint1.droppedTriangles.forEach(function(triangle) {
-        this.sewTriangle(triangle, newJoint1Triangles);
+        this.sewTriangle(triangle, newJoint1Triangles, false);
       }, this);
       spine.joint1.triangles = newJoint1Triangles;
       spine.joint1.triangulated = true;
@@ -242,10 +242,10 @@ Teddy.Body.prototype.sewSkins = function() {
     if (!spine.joint2.triangulated) {
       var newJoint2Triangles = [];
       spine.joint2.elevatedTriangles.forEach(function(triangle) {
-        this.sewTriangle(triangle, newJoint2Triangles);
+        this.sewTriangle(triangle, newJoint2Triangles, true);
       }, this);
       spine.joint2.droppedTriangles.forEach(function(triangle) {
-        this.sewTriangle(triangle, newJoint2Triangles);
+        this.sewTriangle(triangle, newJoint2Triangles, false);
       }, this);
       spine.joint2.triangles = newJoint2Triangles;
       spine.joint2.triangulated = true;
@@ -253,7 +253,7 @@ Teddy.Body.prototype.sewSkins = function() {
   }, this);
 };
 
-Teddy.Body.prototype.sewTriangle = function(triangle, bag) {
+Teddy.Body.prototype.sewTriangle = function(triangle, bag, frontside) {
   var p0 = Teddy.points[triangle[0]];
   var p1 = Teddy.points[triangle[1]];
   var p2 = Teddy.points[triangle[2]];
@@ -306,18 +306,18 @@ Teddy.Body.prototype.sewTriangle = function(triangle, bag) {
   points2.pop(); // throw away
   point.push(Teddy.getPointIndex(points1[points1.length - 1]));
   point.push(Teddy.getPointIndex(points2[points2.length - 1]));
-  bag.push(point);
+  bag.push(Teddy.makeCCW(point, frontside));
   for (var i = 1; i < points1.length; i++) {
-    bag.push([
+    bag.push(Teddy.makeCCW([
       Teddy.getPointIndex(points1[i-1]),
       Teddy.getPointIndex(points2[i-1]),
       Teddy.getPointIndex(points1[i])
-    ]);
-    bag.push([
+    ], frontside));
+    bag.push(Teddy.makeCCW([
       Teddy.getPointIndex(points2[i-1]),
       Teddy.getPointIndex(points2[i]),
       Teddy.getPointIndex(points1[i])
-    ]);
+    ], frontside));
   }
 };
 
@@ -339,9 +339,9 @@ Teddy.Body.prototype.buildMesh = function() {
     }, this);
   }, this);
   geometry.computeFaceNormals();
-//  geometry.computeVertexNormals();
+  geometry.computeVertexNormals();
 
-  this.mesh = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial({color: 0xffffff, side:THREE.DoubleSide, wireframe:wireframe}));
+  this.mesh = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial({color: 0xffffff, wireframe:wireframe}));
 };
 
 Teddy.Body.prototype.getMesh = function() {
@@ -669,7 +669,7 @@ function displayPoint(scene, p, color, z) {
 }
 
 function displayTriangle(scene, triangle, materialType) {
-  triangle = Teddy.makeClockwise(triangle); // TODO: おかしい？
+  triangle = Teddy.makeCCW(triangle); // TODO: おかしい？
 
   var geometry = new THREE.Geometry();
   geometry.vertices.push(Teddy.points[triangle[0]]);
