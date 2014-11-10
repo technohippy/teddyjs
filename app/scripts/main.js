@@ -218,16 +218,20 @@ Teddy.Body.prototype.elevateSpines = function() {
 Teddy.Body.prototype.sewSkins = function() {
   this.spines.forEach(function(spine) {
     var newSpineTriangles = [];
-    spine.triangles.forEach(function(triangle) {
-      this.sewTriangle(triangle['triangle'], newSpineTriangles);
+    spine.elevatedTriangles.forEach(function(triangle) {
+      this.sewTriangle(triangle, newSpineTriangles);
     }, this);
-    spine.triangles = newSpineTriangles.map(function(item) {
-      return {triangle:item};
-    });
+    spine.droppedTriangles.forEach(function(triangle) {
+      this.sewTriangle(triangle, newSpineTriangles);
+    }, this);
+    spine.triangles = newSpineTriangles;
 
     if (!spine.joint1.triangulated) {
       var newJoint1Triangles = [];
-      spine.joint1.triangles.forEach(function(triangle) {
+      spine.joint1.elevatedTriangles.forEach(function(triangle) {
+        this.sewTriangle(triangle, newJoint1Triangles);
+      }, this);
+      spine.joint1.droppedTriangles.forEach(function(triangle) {
         this.sewTriangle(triangle, newJoint1Triangles);
       }, this);
       spine.joint1.triangles = newJoint1Triangles;
@@ -236,7 +240,10 @@ Teddy.Body.prototype.sewSkins = function() {
 
     if (!spine.joint2.triangulated) {
       var newJoint2Triangles = [];
-      spine.joint2.triangles.forEach(function(triangle) {
+      spine.joint2.elevatedTriangles.forEach(function(triangle) {
+        this.sewTriangle(triangle, newJoint2Triangles);
+      }, this);
+      spine.joint2.droppedTriangles.forEach(function(triangle) {
         this.sewTriangle(triangle, newJoint2Triangles);
       }, this);
       spine.joint2.triangles = newJoint2Triangles;
@@ -320,7 +327,8 @@ Teddy.Body.prototype.drawSkins = function(scene) {
       spine.isSleeve() ? 's' :
       spine.isJunction() ? 'j' : '';
     spine.triangles.forEach(function(triangle) {
-      displayTriangle(scene, triangle['triangle'], type);
+//      displayTriangle(scene, triangle['triangle'], type);
+      displayTriangle(scene, triangle, type);
     }, this);
     spine.joint1.triangles.forEach(function(triangle) {
       displayTriangle(scene, triangle, type);
@@ -348,6 +356,8 @@ Teddy.Spine = function(joint1, joint2) {
   this.joint2 = joint2;
   this.joint2.addSpine(this);
   this.triangles = [];
+  this.elevatedTriangles = [];
+  this.droppedTriangles = [];
 };
 
 Teddy.Spine.prototype.getEdgeIdsIncluding = function(point) {
@@ -410,6 +420,27 @@ Teddy.Spine.prototype.getAllPointIdsWithoutIds = function(ids) {
 Teddy.Spine.prototype.elevate = function() {
   if (typeof this.joint1 !== 'undefined') this.joint1.elevate();
   if (typeof this.joint1 !== 'undefined') this.joint2.elevate();
+
+  this.triangles.forEach(function(triangle) {
+    var elevatedTriangle = [];
+    var droppedTriangle = [];
+    triangle.triangle.forEach(function(pointIndex) {
+      if (pointIndex == this.joint1.pointIndex) {
+        elevatedTriangle.push(this.joint1.elevatedPointIndex);
+        droppedTriangle.push(this.joint1.droppedPointIndex);
+      }
+      else if (pointIndex == this.joint2.pointIndex) {
+        elevatedTriangle.push(this.joint2.elevatedPointIndex);
+        droppedTriangle.push(this.joint2.droppedPointIndex);
+      }
+      else {
+        elevatedTriangle.push(pointIndex);
+        droppedTriangle.push(pointIndex);
+      }
+    }, this);
+    this.elevatedTriangles.push(elevatedTriangle);
+    this.droppedTriangles.push(droppedTriangle);
+  }, this);
 };
 
 Teddy.Spine.prototype.isEqual = function(that) {
@@ -445,12 +476,25 @@ Teddy.Joint = function(index) {
   this.pointIndex = index;
   this.spines = [];
   this.triangles = [];
+
+  this.elevatedPointIndex = undefined;
+  this.droppedPointIndex = undefined;
+  this.elevatedTriangles = [];
+  this.droppedTriangles = [];
   this.elevated = false;
   this.triangulated = false;
 };
 
 Teddy.Joint.prototype.getPoint = function() {
   return Teddy.points[this.pointIndex];
+};
+
+Teddy.Joint.prototype.getElevatedPoint = function() {
+  return Teddy.points[this.elevatedPointIndex];
+};
+
+Teddy.Joint.prototype.getDroppedPoint = function() {
+  return Teddy.points[this.droppedPointIndex];
 };
 
 Teddy.Joint.prototype.addSpine = function(spine) {
@@ -515,7 +559,29 @@ Teddy.Joint.prototype.elevate = function() {
   pointIds.forEach(function(pointId) {
     sumDistance += Teddy.points[pointId].distanceTo(jointPoint);
   }, this);
-  Teddy.points[this.pointIndex].z = sumDistance / pointIds.length;
+  // TODO
+  this.getPoint().setZ(sumDistance / pointIds.length);
+
+  this.elevatedPointIndex = Teddy.getPointIndex(this.getPoint().clone().setZ(sumDistance / pointIds.length));
+  this.droppedPointIndex = Teddy.getPointIndex(this.getPoint().clone().setZ(-sumDistance / pointIds.length));
+
+  this.triangles.forEach(function(triangle) {
+    var elevatedTriangle = [];
+    var droppedTriangle = [];
+    triangle.forEach(function(pointIndex) {
+      if (pointIndex == this.pointIndex) {
+        elevatedTriangle.push(this.elevatedPointIndex);
+        droppedTriangle.push(this.droppedPointIndex);
+      }
+      else {
+        elevatedTriangle.push(pointIndex);
+        droppedTriangle.push(pointIndex);
+      }
+    }, this);
+    this.elevatedTriangles.push(elevatedTriangle);
+    this.droppedTriangles.push(droppedTriangle);
+  }, this);
+
 };
 
 
