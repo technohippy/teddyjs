@@ -102,48 +102,48 @@ Teddy.Body.prototype.retrieveSpines = function() {
     switch (triangleType.type) {
       case 't':
         if (triangleType.edges.toString() == '0,1,1,2') {
-          var spine = new Teddy.Spine(teddy, p1, c20);
+          var spine = new Teddy.Spine(this, p1, c20);
           spine.addTriangle({triangle:triangle, edges:triangleType.edges, links:[[2,0]]});
-          teddy.addSpine(spine);
+          this.addSpine(spine);
         }
         else if (triangleType.edges.toString() == '1,2,2,0') {
-          var spine = new Teddy.Spine(teddy, p2, c01);
+          var spine = new Teddy.Spine(this, p2, c01);
           spine.addTriangle({triangle:triangle, edges:triangleType.edges, links:[[0,1]]});
-          teddy.addSpine(spine);
+          this.addSpine(spine);
         }
         else if (triangleType.edges.toString() == '0,1,2,0') {
-          var spine = new Teddy.Spine(teddy, p0, c12);
+          var spine = new Teddy.Spine(this, p0, c12);
           spine.addTriangle({triangle:triangle, edges:triangleType.edges, links:[[1,2]]});
-          teddy.addSpine(spine);
+          this.addSpine(spine);
         }
         break;
       case 's':
         if (triangleType.edges.toString() == '0,1') {
-          var spine = new Teddy.Spine(teddy, c12, c20);
+          var spine = new Teddy.Spine(this, c12, c20);
           spine.addTriangle({triangle:triangle, edges:triangleType.edges, links:[[1,2], [2,0]]});
-          teddy.addSpine(spine);
+          this.addSpine(spine);
         }
         else if (triangleType.edges.toString() == '1,2') {
-          var spine = new Teddy.Spine(teddy, c20, c01);
+          var spine = new Teddy.Spine(this, c20, c01);
           spine.addTriangle({triangle:triangle, edges:triangleType.edges, links:[[2,0], [0,1]]});
-          teddy.addSpine(spine);
+          this.addSpine(spine);
         }
         else if (triangleType.edges.toString() == '2,0') {
-          var spine = new Teddy.Spine(teddy, c01, c12);
+          var spine = new Teddy.Spine(this, c01, c12);
           spine.addTriangle({triangle:triangle, edges:triangleType.edges, links:[[0,1], [1,2]]});
-          teddy.addSpine(spine);
+          this.addSpine(spine);
         }
         break;
       case 'j':
-        var spine1 = new Teddy.Spine(teddy, c01, c012);
+        var spine1 = new Teddy.Spine(this, c01, c012);
         spine1.addTriangle({triangle:triangle, edges:triangleType.edges, links:[[0,1], [1,2], [2,0]]});
-        teddy.addSpine(spine1);
-        var spine2 = new Teddy.Spine(teddy, c12, c012);
+        this.addSpine(spine1);
+        var spine2 = new Teddy.Spine(this, c12, c012);
         spine2.addTriangle({triangle:triangle, edges:triangleType.edges, links:[[0,1], [1,2], [2,0]]});
-        teddy.addSpine(spine2);
-        var spine3 = new Teddy.Spine(teddy, c20, c012);
+        this.addSpine(spine2);
+        var spine3 = new Teddy.Spine(this, c20, c012);
         spine3.addTriangle({triangle:triangle, edges:triangleType.edges, links:[[0,1], [1,2], [2,0]]});
-        teddy.addSpine(spine3);
+        this.addSpine(spine3);
         break;
     }
   }, this);
@@ -348,14 +348,18 @@ Teddy.Body.prototype.sewTriangle = function(triangle, bag, frontside) {
   var p2 = this.points[triangle[2]];
   var highs = [];
   var lows = [];
-  p0.z === 0 ? lows.push(p0) : highs.push(p0);
-  p1.z === 0 ? lows.push(p1) : highs.push(p1);
-  p2.z === 0 ? lows.push(p2) : highs.push(p2);
+  Math.abs(p0.z) < 0.0001 ? lows.push(p0) : highs.push(p0);
+  Math.abs(p1.z) < 0.0001 ? lows.push(p1) : highs.push(p1);
+  Math.abs(p2.z) < 0.0001 ? lows.push(p2) : highs.push(p2);
 
   var points1 = [];
   var highPoint = highs[0];
   var lowPoint = lows[0];
   var height = highPoint.z;
+  if (!highPoint || !lowPoint) {
+    console.log(highs);
+    console.log(lows);
+  }
   var projectedSlope = lowPoint.clone().sub(highPoint.clone().setZ(lowPoint.z));
   var width = projectedSlope.length();
   for (var deg = 0; deg <= 90; deg += 10) {
