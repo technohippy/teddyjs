@@ -26,6 +26,7 @@ function render() {
 render();
 
 
+var firstPoint = undefined;
 var drawing = false;
 var points = [];
 var lines = [];
@@ -47,6 +48,29 @@ function ifOnPaperDo(event, handler) {
   }
 }
 
+function make3D() {
+  if (currentMesh) scene.remove(currentMesh);
+  firstPoint = undefined;
+  drawing = false;
+  lines.forEach(function(line) {scene.remove(line)});
+  lines = [];
+  var teddy = new Teddy.Body(points);
+  try {
+    currentMesh = teddy.getMesh();
+  }
+  catch (e) {
+    points = [];
+    alert('Fail to create 3D mesh');
+    return;
+  }
+  scene.add(currentMesh);
+  //teddy.debugAddSpineMeshes(scene);
+
+  points = [];
+  paper.material.opacity = 0;
+  new THREE.OrbitControls(camera);
+}
+
 document.addEventListener('keyup', function(event) {
   if (event.keyCode === 13) { // enter key
     window.location.reload();
@@ -55,19 +79,7 @@ document.addEventListener('keyup', function(event) {
 
 renderer.domElement.addEventListener('mouseup', function(event) {
   if (paper.material.opacity === 0) return
-
-  if (currentMesh) scene.remove(currentMesh);
-  var teddy = new Teddy.Body(points);
-  currentMesh = teddy.getMesh();
-  scene.add(currentMesh);
-  //teddy.debugAddSpineMeshes(scene);
-
-  points = [];
-  lines.forEach(function(line) {scene.remove(line)});
-  lines = [];
-  paper.material.opacity = 0;
-  new THREE.OrbitControls(camera);
-  drawing = false;
+  make3D();
 });
 
 renderer.domElement.addEventListener('mousedown', function(event) {
@@ -83,6 +95,10 @@ renderer.domElement.addEventListener('mousemove', function(event) {
 
   ifOnPaperDo(event, function(obj) {
     var point = obj.point;
+    if (points.length == 0) {
+      firstPoint = point.clone();
+    }
+
     if (points.length == 0 || 0.1 < points[points.length - 1].distanceTo(point)) {
       // avoid collinear
       if (2 <= points.length) {
@@ -93,6 +109,12 @@ renderer.domElement.addEventListener('mousemove', function(event) {
       }
 
       points.push(point);
+
+      if (5 < points.length && firstPoint.distanceTo(point) < 0.1) {
+        make3D();
+        return;
+      }
+
       if (2 <= points.length) {
         var lineGeometry = new THREE.Geometry();
         lineGeometry.vertices.push(points[points.length - 1].clone().setZ(0.01));

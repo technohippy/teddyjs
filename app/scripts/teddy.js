@@ -492,7 +492,7 @@ Teddy.Body.prototype.getMesh = function() {
     this.elevateSpines();
     this.sewSkins();
     this.buildMesh();
-    for (var i = 0; i < 10; i++) this.smoothMesh();
+    for (var i = 0; i < 5; i++) this.smoothMesh();
   }
   return this.mesh;
 };
