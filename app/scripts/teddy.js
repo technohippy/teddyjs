@@ -312,39 +312,6 @@ Teddy.Body.prototype.elevateSpines = function() {
   }, this);
 };
 
-Teddy.Body.prototype.smoothSpines = function() {
-  var joints = [];
-  this.spines.forEach(function(spine) {
-    joints.push(spine.joint1);
-    joints.push(spine.joint2);
-  }, this);
-
-  joints.forEach(function(joint) {
-    if (joint.spines.length <= 2) {
-      var joint1 = joint.spines[0].getNextJoint(joint);
-      var joint2 = joint.spines[1].getNextJoint(joint);
-      var point1 = joint1.getElevatedPoint();
-      var point2 = joint2.getElevatedPoint();
-      if (typeof point1 !== 'undefined' && typeof point2 !== 'undefined') {
-        joint.getElevatedPoint().set(
-          (point1.x + point2.x) / 2,
-          (point1.y + point2.y) / 2,
-          (point1.z + point2.z) / 2
-        );
-      }
-      point1 = joint1.getDroppedPoint();
-      point2 = joint2.getDroppedPoint();
-      if (typeof point1 !== 'undefined' && typeof point2 !== 'undefined') {
-        joint.getDroppedPoint().set(
-          (point1.x + point2.x) / 2,
-          (point1.y + point2.y) / 2,
-          (point1.z + point2.z) / 2
-        );
-      }
-    }
-  }, this);
-};
-
 Teddy.Body.prototype.sewSkins = function() {
   this.spines.forEach(function(spine) {
     var newSpineTriangles = [];
@@ -474,6 +441,38 @@ Teddy.Body.prototype.buildMesh = function() {
   this.mesh = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial({color: 0xffffff, wireframe:false}));
 };
 
+Teddy.Body.prototype.smoothMesh = function() {
+  if (typeof this.mesh === 'undefined') return;
+
+  var table = {};
+  var geometry = this.mesh.geometry;
+  geometry.faces.forEach(function(face) {
+    if (typeof table[face.a] === 'undefined') table[face.a] = [];
+    if (typeof table[face.b] === 'undefined') table[face.b] = [];
+    if (typeof table[face.c] === 'undefined') table[face.c] = [];
+    table[face.a].push(face.b);
+    table[face.a].push(face.c);
+    table[face.b].push(face.c);
+    table[face.b].push(face.a);
+    table[face.c].push(face.a);
+    table[face.c].push(face.b);
+  }, this);
+  Object.keys(table).forEach(function(key) {
+    var pointIds = table[key];
+    var avePoint = new THREE.Vector3();
+    pointIds.forEach(function(pointId) {
+      avePoint.add(geometry.vertices[pointId]);
+    }, this);
+    avePoint.multiplyScalar(1 / pointIds.length);
+    table[key] = avePoint;
+  }, this);
+  Object.keys(table).forEach(function(key) {
+    geometry.vertices[key].copy(table[key]);
+  }, this);
+  geometry.computeFaceNormals();
+  geometry.computeVertexNormals();
+};
+
 Teddy.Body.prototype.debugAddSpineMeshes = function(scene) {
   this.spines.forEach(function(spine) {
     var geometry = new THREE.Geometry();
@@ -491,9 +490,9 @@ Teddy.Body.prototype.getMesh = function() {
     this.retrieveSpines();
     this.prunSpines();
     this.elevateSpines();
-    for (var i = 0; i < 10; i++) this.smoothSpines(); // for the time being
     this.sewSkins();
     this.buildMesh();
+    for (var i = 0; i < 10; i++) this.smoothMesh();
   }
   return this.mesh;
 };
