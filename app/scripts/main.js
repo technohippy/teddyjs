@@ -33,12 +33,16 @@ var points = [];
 var lines = [];
 var currentMesh = null;
 document.addEventListener('keyup', function(event) {
-  if (event.keyCode === 32) { // space key
+  if (event.keyCode === 13) { // enter key
+    window.location.reload();
+  }
+  else if (event.keyCode === 32) { // space key
     if (drawing) {
       if (currentMesh) scene.remove(currentMesh);
       var teddy = new Teddy.Body(points);
       currentMesh = teddy.getMesh();
       scene.add(currentMesh);
+      //teddy.debugAddSpineMeshes(scene);
 
       points = [];
       lines.forEach(function(line) {scene.remove(line)});
