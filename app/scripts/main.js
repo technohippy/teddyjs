@@ -19,9 +19,7 @@ var material = new THREE.MeshBasicMaterial({color:0xffffff, side:THREE.DoubleSid
 var paper = new THREE.Mesh(geometry, material);
 scene.add(paper);
 
-var controls = new THREE.OrbitControls(camera);
 function render() {
-  controls.update(); 
   requestAnimationFrame(render);
   renderer.render(scene, camera);
 };
@@ -32,30 +30,9 @@ var drawing = false;
 var points = [];
 var lines = [];
 var currentMesh = null;
-document.addEventListener('keyup', function(event) {
-  if (event.keyCode === 13) { // enter key
-    window.location.reload();
-  }
-  else if (event.keyCode === 32) { // space key
-    if (drawing) {
-      if (currentMesh) scene.remove(currentMesh);
-      var teddy = new Teddy.Body(points);
-      currentMesh = teddy.getMesh();
-      scene.add(currentMesh);
-      //teddy.debugAddSpineMeshes(scene);
-
-      points = [];
-      lines.forEach(function(line) {scene.remove(line)});
-      lines = [];
-      paper.material.opacity = 0;
-    }
-    drawing = !drawing;
-  }
-});
 var projector = new THREE.Projector();
-renderer.domElement.addEventListener('mousemove', function(event) {
-  if (!drawing) return
 
+function ifOnPaperDo(event, handler) {
   var rect = event.target.getBoundingClientRect();
   var mouseX = event.clientX - rect.left;
   var mouseY = event.clientY - rect.top;
@@ -66,7 +43,46 @@ renderer.domElement.addEventListener('mousemove', function(event) {
   var ray = new THREE.Raycaster(camera.position, pos.sub(camera.position).normalize());
   var objs = ray.intersectObjects([paper]);
   if (objs.length == 1) {
-    var point = objs[0].point;
+    handler(objs[0]);
+  }
+}
+
+document.addEventListener('keyup', function(event) {
+  if (event.keyCode === 13) { // enter key
+    window.location.reload();
+  }
+});
+
+renderer.domElement.addEventListener('mouseup', function(event) {
+  if (paper.material.opacity === 0) return
+
+  if (currentMesh) scene.remove(currentMesh);
+  var teddy = new Teddy.Body(points);
+  currentMesh = teddy.getMesh();
+  scene.add(currentMesh);
+  //teddy.debugAddSpineMeshes(scene);
+
+  points = [];
+  lines.forEach(function(line) {scene.remove(line)});
+  lines = [];
+  paper.material.opacity = 0;
+  new THREE.OrbitControls(camera);
+  drawing = false;
+});
+
+renderer.domElement.addEventListener('mousedown', function(event) {
+  if (paper.material.opacity === 0) return
+
+  ifOnPaperDo(event, function(obj) {
+    drawing = true;
+  });
+});
+
+renderer.domElement.addEventListener('mousemove', function(event) {
+  if (!drawing || paper.material.opacity === 0) return
+
+  ifOnPaperDo(event, function(obj) {
+    var point = obj.point;
     if (points.length == 0 || 0.1 < points[points.length - 1].distanceTo(point)) {
       // avoid collinear
       if (2 <= points.length) {
@@ -86,5 +102,5 @@ renderer.domElement.addEventListener('mousemove', function(event) {
         lines.push(line);
       }
     }
-  }
+  });
 });
