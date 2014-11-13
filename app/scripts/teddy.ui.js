@@ -3,6 +3,14 @@ var Teddy = Teddy || {};
 Teddy.UI = {};
 
 Teddy.UI.setup = function(scene, renderer, camera, paper) {
+  if (typeof paper === 'undefined') {
+    paper = new THREE.Mesh(
+      new THREE.PlaneGeometry(8, 8),
+      new THREE.MeshBasicMaterial({color:0xffffff, transparent:true})
+    );
+    scene.add(paper);
+  }
+
   var firstPoint = new THREE.Mesh(
     new THREE.BoxGeometry(0.2, 0.2, 0.2),
     new THREE.MeshLambertMaterial({color:0xff0000, transparent:true, opacity:0.5})
