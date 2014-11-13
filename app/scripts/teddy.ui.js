@@ -6,7 +6,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   if (typeof paper === 'undefined') {
     paper = new THREE.Mesh(
       new THREE.PlaneGeometry(8, 8),
-      new THREE.MeshBasicMaterial({color:0xffffff, transparent:true})
+      new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, map:texture})
     );
     scene.add(paper);
   }
@@ -51,6 +51,19 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     var teddy = new Teddy.Body(points);
     try {
       currentMesh = teddy.getMesh();
+
+      var geometry = currentMesh.geometry;
+      geometry.faces.forEach(function(face) {
+        var pa = geometry.vertices[face.a];
+        var pb = geometry.vertices[face.b];
+        var pc = geometry.vertices[face.c];
+        geometry.faceVertexUvs[0].push([
+          new THREE.Vector2((pa.x + 4)/8, (pa.y + 4)/8),
+          new THREE.Vector2((pb.x + 4)/8, (pb.y + 4)/8),
+          new THREE.Vector2((pc.x + 4)/8, (pc.y + 4)/8)
+        ]);
+      }, this);
+      currentMesh.material.map = texture;
     }
     catch (e) {
       points = [];
@@ -118,8 +131,19 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   });
 
   renderer.domElement.addEventListener('mousemove', function(event) {
-    if (!drawing || paper.material.opacity === 0) return
-    ifOnPaperDo(event, function(obj) {drawLine(obj.point)});
+    if (paper.material.opacity === 0) return
+    if (event.shiftKey) {
+      ifOnPaperDo(event, function(obj) {
+        var x = (obj.point.x + 4) / 8 * 200;
+        var y = 200 - (obj.point.y + 4) / 8 * 200;
+        gc.fillStyle = 'rgb(0,0,255)';
+        gc.fillRect(x, y, 10, 10);
+        texture.needsUpdate = true;
+      });
+    }
+    else if (drawing) {
+      ifOnPaperDo(event, function(obj) {drawLine(obj.point)});
+    }
   });
 
   renderer.domElement.addEventListener('touchend', function(event) {

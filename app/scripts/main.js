@@ -1,3 +1,23 @@
+var canvas = document.getElementById('texture');
+var gc = canvas.getContext('2d');
+gc.fillStyle = 'rgb(255,255,255)';
+gc.fillRect(0, 0, 200, 200);
+var texture = new THREE.Texture(canvas);
+texture.needsUpdate = true;
+
+canvas.addEventListener('click', function(event) {
+  var rect = event.target.getBoundingClientRect();
+  var mouseX = event.clientX - rect.left;
+  var mouseY = event.clientY - rect.top;
+  gc.fillStyle = 'rgb(0,0,0)';
+  gc.fillRect(mouseX, mouseY, 20, 20);
+  texture.needsUpdate = true;
+});
+
+
+
+
+
 (function() {
 
 var scene = new THREE.Scene();
