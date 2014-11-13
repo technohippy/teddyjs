@@ -81,6 +81,47 @@ function make3D() {
   new THREE.OrbitControls(camera);
 }
 
+function drawLine(point) {
+  if (points.length ==- 0) {
+    firstPoint.position.copy(point).setZ(0.2);
+  }
+  firstPoint.rotation.x += 0.05;
+  firstPoint.rotation.y += 0.025;
+  firstPoint.rotation.z += 0.0125;
+
+  if (points.length == 0 || 0.1 < points[points.length - 1].distanceTo(point)) {
+    // avoid collinear
+    while (2 <= points.length) {
+      var p01 = point.clone().sub(points[points.length - 1]);
+      var p02 = point.clone().sub(points[points.length - 2]);
+      var deg = Math.acos(p01.dot(p02) / p01.length() / p02.length()) / Math.PI * 180;
+      if (deg < 1) {
+        scene.remove(lines.pop());
+        points.pop();
+      }
+      else {
+        break;
+      }
+    }
+
+    points.push(point);
+
+    if (2 <= points.length) {
+      var lineGeometry = new THREE.Geometry();
+      lineGeometry.vertices.push(points[points.length - 1].clone().setZ(0.01));
+      lineGeometry.vertices.push(points[points.length - 2].clone().setZ(0.01));
+      var line = new THREE.Line(lineGeometry, new THREE.LineBasicMaterial({color: 0x990000}));
+      scene.add(line);
+      lines.push(line);
+    }
+
+    if (5 < points.length && firstPoint.position.clone().setZ(0).distanceTo(point) < 0.1) {
+      make3D();
+      return;
+    }
+  }
+}
+
 document.addEventListener('keyup', function(event) {
   if (event.keyCode === 13) { // enter key
     window.location.reload();
@@ -94,54 +135,25 @@ renderer.domElement.addEventListener('mouseup', function(event) {
 
 renderer.domElement.addEventListener('mousedown', function(event) {
   if (paper.material.opacity === 0) return
-
-  ifOnPaperDo(event, function(obj) {
-    drawing = true;
-  });
+  ifOnPaperDo(event, function(obj) {drawing = true});
 });
 
 renderer.domElement.addEventListener('mousemove', function(event) {
   if (!drawing || paper.material.opacity === 0) return
+  ifOnPaperDo(event, function(obj) {drawLine(obj.point)});
+});
 
-  ifOnPaperDo(event, function(obj) {
-    var point = obj.point;
-    if (points.length ==- 0) {
-      firstPoint.position.copy(point).setZ(0.2);
-    }
-    firstPoint.rotation.x += 0.05;
-    firstPoint.rotation.y += 0.025;
-    firstPoint.rotation.z += 0.0125;
+renderer.domElement.addEventListener('touchend', function(event) {
+  if (paper.material.opacity === 0) return
+  make3D();
+});
 
-    if (points.length == 0 || 0.1 < points[points.length - 1].distanceTo(point)) {
-      // avoid collinear
-      while (2 <= points.length) {
-        var p01 = point.clone().sub(points[points.length - 1]);
-        var p02 = point.clone().sub(points[points.length - 2]);
-        var deg = Math.acos(p01.dot(p02) / p01.length() / p02.length()) / Math.PI * 180;
-        if (deg < 1) {
-          scene.remove(lines.pop());
-          points.pop();
-        }
-        else {
-          break;
-        }
-      }
+renderer.domElement.addEventListener('touchstart', function(event) {
+  if (paper.material.opacity === 0) return
+  ifOnPaperDo(event.touches[0], function(obj) {drawing = true});
+});
 
-      points.push(point);
-
-      if (2 <= points.length) {
-        var lineGeometry = new THREE.Geometry();
-        lineGeometry.vertices.push(points[points.length - 1].clone().setZ(0.01));
-        lineGeometry.vertices.push(points[points.length - 2].clone().setZ(0.01));
-        var line = new THREE.Line(lineGeometry, new THREE.LineBasicMaterial({color: 0x990000}));
-        scene.add(line);
-        lines.push(line);
-      }
-
-      if (5 < points.length && firstPoint.position.clone().setZ(0).distanceTo(point) < 0.1) {
-        make3D();
-        return;
-      }
-    }
-  });
+renderer.domElement.addEventListener('touchmove', function(event) {
+  if (!drawing || paper.material.opacity === 0) return
+  ifOnPaperDo(event.touches[0], function(obj) {drawLine(obj.point)});
 });
