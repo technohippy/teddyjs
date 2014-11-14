@@ -2,7 +2,30 @@ var Teddy = Teddy || {};
 
 Teddy.UI = {};
 
+Teddy.UI.addTextureCanvas = function(textureWidth, textureHeight) {
+  var canvas = document.createElement('canvas');
+  canvas.id = 'texture';
+  canvas.style.position = 'absolute';
+  canvas.style.top = '-' + textureHeight + 'px';
+  canvas.style.left = '' + textureWidth + 'px';
+  canvas.style.backgroundColor = 'white';
+  canvas.width = textureWidth;
+  canvas.height = textureHeight;
+  var gc = canvas.getContext('2d');
+  gc.fillStyle = 'rgb(255,255,255)';
+  gc.fillRect(0, 0, textureWidth, textureHeight);
+  document.body.appendChild(canvas);
+  return canvas;
+};
+
 Teddy.UI.setup = function(scene, renderer, camera, paper) {
+  var textureWidth = 600;
+  var textureHeight = 600;
+  var canvas = Teddy.UI.addTextureCanvas(textureWidth, textureHeight);
+  var textureContext = canvas.getContext('2d');
+  var texture = new THREE.Texture(canvas);
+  texture.needsUpdate = true;
+
   if (typeof paper === 'undefined') {
     paper = new THREE.Mesh(
       new THREE.PlaneGeometry(8, 8),
@@ -143,10 +166,10 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     if (paper.material.opacity === 0) return
     if (event.shiftKey) {
       ifOnPaperDo(event, function(obj) {
-        var x = (obj.point.x + 4) / 8 * 200;
-        var y = 200 - (obj.point.y + 4) / 8 * 200;
-        gc.fillStyle = 'rgb(0,0,255)';
-        gc.fillRect(x, y, 10, 10);
+        var x = (obj.point.x + 4) / 8 * textureWidth;
+        var y = textureHeight - (obj.point.y + 4) / 8 * textureHeight;
+        textureContext.fillStyle = 'rgb(0,0,255)';
+        textureContext.fillRect(x, y, 10, 10);
         texture.needsUpdate = true;
       });
     }
