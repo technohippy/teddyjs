@@ -19,6 +19,8 @@ Teddy.UI.addTextureCanvas = function(textureWidth, textureHeight) {
 };
 
 Teddy.UI.setup = function(scene, renderer, camera, paper) {
+  var controls = new THREE.OrbitControls(camera);
+  controls.enabled = false;
   var textureWidth = 600;
   var textureHeight = 600;
   var canvas = Teddy.UI.addTextureCanvas(textureWidth, textureHeight);
@@ -34,25 +36,31 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     scene.add(paper);
   }
 
-  var firstPoint = new THREE.Mesh(
+  var firstScissorsPoint = new THREE.Mesh(
     new THREE.BoxGeometry(0.2, 0.2, 0.2),
     new THREE.MeshLambertMaterial({color:0xff0000, transparent:true, opacity:0.5})
   );
-  firstPoint.position.set(-1000, -1000, -1000);
-  //scene.add(firstPoint);
+  firstScissorsPoint.position.set(-1000, -1000, -1000);
+  //scene.add(firstScissorsPoint);
 
   var drawing = false;
   var points = [];
   var lines = [];
-  var currentMesh = null;
+  var currentMesh = undefined;
   var projector = new THREE.Projector();
-  var lineColor = new THREE.Color(Math.random(), Math.random(), Math.random());
+  var rDeg = 0;
+  var gDeg = 0;
+  var bDeg = 0;
+  var lineColor = new THREE.Color(Math.sin(rDeg/180*Math.PI), Math.sin(gDeg/180*Math.PI), Math.sin(bDeg/180*Math.PI));
   var lineMaterial = new THREE.LineBasicMaterial({color: lineColor});
   (function changeLineColor() {
     requestAnimationFrame(changeLineColor);
-    lineColor.r = (lineColor.r + 0.001) % 1;
-    lineColor.g = (lineColor.g + 0.003) % 1;
-    lineColor.b = (lineColor.b + 0.007) % 1;
+    rDeg += 1;
+    gDeg += 2;
+    bDeg += 3;
+    lineColor.r = Math.sin(rDeg/180*Math.PI);
+    lineColor.g = Math.sin(gDeg/180*Math.PI);
+    lineColor.b = Math.sin(bDeg/180*Math.PI);
     lineMaterial.color.copy(lineColor);
   })();
 
@@ -73,10 +81,10 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
 
   function make3D() {
     if (currentMesh) scene.remove(currentMesh);
-    firstPoint.position.set(-1000, -1000, -1000);
-    firstPoint.rotation.x = 0;
-    firstPoint.rotation.y = 0;
-    firstPoint.rotation.z = 0;
+    firstScissorsPoint.position.set(-1000, -1000, -1000);
+    firstScissorsPoint.rotation.x = 0;
+    firstScissorsPoint.rotation.y = 0;
+    firstScissorsPoint.rotation.z = 0;
     drawing = false;
     lines.forEach(function(line) {scene.remove(line)});
     lines = [];
@@ -108,16 +116,16 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
 
     points = [];
     paper.material.opacity = 0;
-    new THREE.OrbitControls(camera);
+    controls.enabled = true;
   }
 
   function drawLine(point) {
     if (points.length ==- 0) {
-      firstPoint.position.copy(point).setZ(0.2);
+      firstScissorsPoint.position.copy(point).setZ(0.2);
     }
-    firstPoint.rotation.x += 0.05;
-    firstPoint.rotation.y += 0.025;
-    firstPoint.rotation.z += 0.0125;
+    firstScissorsPoint.rotation.x += 0.05;
+    firstScissorsPoint.rotation.y += 0.025;
+    firstScissorsPoint.rotation.z += 0.0125;
 
     if (points.length == 0 || 0.1 < points[points.length - 1].distanceTo(point)) {
       // avoid collinear
@@ -145,37 +153,99 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
         lines.push(line);
       }
 
-      if (5 < points.length && firstPoint.position.clone().setZ(0).distanceTo(point) < 0.1) {
-        make3D();
+      if (5 < points.length && firstScissorsPoint.position.clone().setZ(0).distanceTo(point) < 0.1) {
+        //make3D();
         return;
       }
     }
   }
 
+  function clear() {
+    mode = 'pen';
+    mouseLastPoint = undefined;
+    firstScissorsPoint.position.set(-1000, -1000, -1000);
+    drawing = false;
+    points = [];
+    if (currentMesh) scene.remove(currentMesh);
+    currentMesh = undefined;
+    lines.forEach(function(line) {scene.remove(line)});
+    lines = [];
+    paper.material.opacity = 1;
+    textureContext.fillStyle = 'rgb(255,255,255)';
+    textureContext.fillRect(0, 0, textureWidth, textureHeight);
+    texture.needsUpdate = true;
+    camera.position.set(0, 0, 8);
+    camera.lookAt(0, 0, 0);
+    controls.reset();
+    controls.enabled = false;
+  }
+
+  var mode = 'pen';
+  var mouseLastPoint = undefined;
+
+  document.getElementById('pen-button').addEventListener('click', function(event) {
+    mode = 'pen';
+    drawing = false;
+    mouseLastPoint = undefined;
+  });
+
+  document.getElementById('scissors-button').addEventListener('click', function(event) {
+    mode = 'scissors';
+    drawing = false;
+    points = [];
+    lines = [];
+  });
+
+  document.getElementById('teddy-button').addEventListener('click', function(event) {
+    make3D();
+  });
+
+  document.getElementById('clear-button').addEventListener('click', function(event) {
+    clear();
+  });
+
   renderer.domElement.addEventListener('mouseup', function(event) {
     if (paper.material.opacity === 0) return
-    make3D();
+    //make3D();
+    drawing = false;
+    mouseLastPoint = undefined;
   });
 
   renderer.domElement.addEventListener('mousedown', function(event) {
     if (paper.material.opacity === 0) return
-    ifOnPaperDo(event, function(obj) {drawing = true});
+    ifOnPaperDo(event, function(obj) {
+      drawing = true
+    });
   });
 
   renderer.domElement.addEventListener('mousemove', function(event) {
     if (paper.material.opacity === 0) return
-    if (event.shiftKey) {
-      ifOnPaperDo(event, function(obj) {
+    if (!drawing) return;
+
+    ifOnPaperDo(event, function(obj) {
+      if (mode === 'pen') {
         var x = (obj.point.x + 4) / 8 * textureWidth;
         var y = textureHeight - (obj.point.y + 4) / 8 * textureHeight;
-        textureContext.fillStyle = 'rgb(0,0,255)';
-        textureContext.fillRect(x, y, 10, 10);
-        texture.needsUpdate = true;
-      });
-    }
-    else if (drawing) {
-      ifOnPaperDo(event, function(obj) {drawLine(obj.point)});
-    }
+        if (typeof mouseLastPoint === 'undefined') {
+          mouseLastPoint = {x:x, y:y};
+        }
+        else {
+          textureContext.strokeStyle = 'rgb(0,0,255)';
+          textureContext.lineCap = 'round';
+          textureContext.lineWidth = 50;
+          textureContext.beginPath();
+          textureContext.moveTo(mouseLastPoint.x, mouseLastPoint.y);
+          textureContext.lineTo(x, y);
+          textureContext.stroke();
+          mouseLastPoint.x = x;
+          mouseLastPoint.y = y;
+          texture.needsUpdate = true;
+        }
+      }
+      else if (mode === 'scissors') {
+        drawLine(obj.point);
+      }
+    });
   });
 
   renderer.domElement.addEventListener('touchend', function(event) {
