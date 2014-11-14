@@ -23,7 +23,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   var lines = [];
   var currentMesh = null;
   var projector = new THREE.Projector();
-  var lineColor = new THREE.Color(0, 0, 0);
+  var lineColor = new THREE.Color(Math.random(), Math.random(), Math.random());
   var lineMaterial = new THREE.LineBasicMaterial({color: lineColor});
   (function changeLineColor() {
     requestAnimationFrame(changeLineColor);
