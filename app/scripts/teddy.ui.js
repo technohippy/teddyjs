@@ -16,13 +16,22 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     new THREE.MeshLambertMaterial({color:0xff0000, transparent:true, opacity:0.5})
   );
   firstPoint.position.set(-1000, -1000, -1000);
-  scene.add(firstPoint);
+  //scene.add(firstPoint);
 
   var drawing = false;
   var points = [];
   var lines = [];
   var currentMesh = null;
   var projector = new THREE.Projector();
+  var lineColor = new THREE.Color(0, 0, 0);
+  var lineMaterial = new THREE.LineBasicMaterial({color: lineColor});
+  (function changeLineColor() {
+    requestAnimationFrame(changeLineColor);
+    lineColor.r = (lineColor.r + 0.001) % 1;
+    lineColor.g = (lineColor.g + 0.003) % 1;
+    lineColor.b = (lineColor.b + 0.007) % 1;
+    lineMaterial.color.copy(lineColor);
+  })();
 
   function ifOnPaperDo(event, handler) {
     var rect = event.target.getBoundingClientRect();
@@ -108,7 +117,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
         var lineGeometry = new THREE.Geometry();
         lineGeometry.vertices.push(points[points.length - 1].clone().setZ(0.01));
         lineGeometry.vertices.push(points[points.length - 2].clone().setZ(0.01));
-        var line = new THREE.Line(lineGeometry, new THREE.LineBasicMaterial({color: 0x990000}));
+        var line = new THREE.Line(lineGeometry, lineMaterial);
         scene.add(line);
         lines.push(line);
       }
