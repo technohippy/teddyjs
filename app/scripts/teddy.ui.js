@@ -120,6 +120,26 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   }
 
   function drawLine(point) {
+    var x = (point.x + 4) / 8 * textureWidth;
+    var y = textureHeight - (point.y + 4) / 8 * textureHeight;
+    if (typeof mouseLastPoint === 'undefined') {
+      mouseLastPoint = {x:x, y:y};
+    }
+    else {
+      textureContext.strokeStyle = 'rgb(0,0,255)';
+      textureContext.lineCap = 'round';
+      textureContext.lineWidth = 50;
+      textureContext.beginPath();
+      textureContext.moveTo(mouseLastPoint.x, mouseLastPoint.y);
+      textureContext.lineTo(x, y);
+      textureContext.stroke();
+      mouseLastPoint.x = x;
+      mouseLastPoint.y = y;
+      texture.needsUpdate = true;
+    }
+  }
+
+  function cutLine(point) {
     if (points.length ==- 0) {
       firstScissorsPoint.position.copy(point).setZ(0.2);
     }
@@ -213,9 +233,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
 
   renderer.domElement.addEventListener('mousedown', function(event) {
     if (paper.material.opacity === 0) return
-    ifOnPaperDo(event, function(obj) {
-      drawing = true
-    });
+    ifOnPaperDo(event, function(obj) {drawing = true});
   });
 
   renderer.domElement.addEventListener('mousemove', function(event) {
@@ -223,34 +241,16 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     if (!drawing) return;
 
     ifOnPaperDo(event, function(obj) {
-      if (mode === 'pen') {
-        var x = (obj.point.x + 4) / 8 * textureWidth;
-        var y = textureHeight - (obj.point.y + 4) / 8 * textureHeight;
-        if (typeof mouseLastPoint === 'undefined') {
-          mouseLastPoint = {x:x, y:y};
-        }
-        else {
-          textureContext.strokeStyle = 'rgb(0,0,255)';
-          textureContext.lineCap = 'round';
-          textureContext.lineWidth = 50;
-          textureContext.beginPath();
-          textureContext.moveTo(mouseLastPoint.x, mouseLastPoint.y);
-          textureContext.lineTo(x, y);
-          textureContext.stroke();
-          mouseLastPoint.x = x;
-          mouseLastPoint.y = y;
-          texture.needsUpdate = true;
-        }
-      }
-      else if (mode === 'scissors') {
-        drawLine(obj.point);
-      }
+      if (mode === 'pen') drawLine(obj.point);
+      else if (mode === 'scissors') cutLine(obj.point);
     });
   });
 
   renderer.domElement.addEventListener('touchend', function(event) {
     if (paper.material.opacity === 0) return
-    make3D();
+    //make3D();
+    drawing = false;
+    mouseLastPoint = undefined;
   });
 
   renderer.domElement.addEventListener('touchstart', function(event) {
@@ -259,7 +259,12 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   });
 
   renderer.domElement.addEventListener('touchmove', function(event) {
-    if (!drawing || paper.material.opacity === 0) return
-    ifOnPaperDo(event.touches[0], function(obj) {drawLine(obj.point)});
+    if (paper.material.opacity === 0) return
+    if (!drawing) return;
+
+    ifOnPaperDo(event.touches[0], function(obj) {
+      if (mode === 'pen') drawLine(obj.point);
+      else if (mode === 'scissors') cutLine(obj.point);
+    });
   });
 };
