@@ -24,6 +24,8 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   var nowMakingDialog = document.createElement('div');
   nowMakingDialog.classList.add('now-making');
   nowMakingDialog.textContent = 'Now Building...';
+  nowMakingDialog.style.display = 'none';
+  document.body.appendChild(nowMakingDialog);
   var textureWidth = 600;
   var textureHeight = 600;
   var canvas = Teddy.UI.addTextureCanvas(textureWidth, textureHeight);
@@ -81,9 +83,8 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
       handler(objs[0]);
     }
   }
-
+  
   function make3D() {
-    document.body.appendChild(nowMakingDialog);
     firstScissorsPoint.position.set(-1000, -1000, -1000);
     firstScissorsPoint.rotation.x = 0;
     firstScissorsPoint.rotation.y = 0;
@@ -116,9 +117,6 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
       alert('Fail to create 3D mesh');
       return;
     }
-    finally {
-      document.body.removeChild(nowMakingDialog);
-    }
     scene.add(currentMesh);
     //teddy.debugAddSpineMeshes(scene);
 
@@ -128,15 +126,23 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   }
 
   function drawLine(point) {
+    var lineWidth = 50;
+    var lineColor = 'rgb(0,0,255)';
     var x = (point.x + 4) / 8 * textureWidth;
     var y = textureHeight - (point.y + 4) / 8 * textureHeight;
     if (typeof mouseLastPoint === 'undefined') {
       mouseLastPoint = {x:x, y:y};
+      textureContext.fillStyle = lineColor;
+      textureContext.beginPath();
+      textureContext.arc(x, y, lineWidth/2, 0, 2 * Math.PI);
+      textureContext.closePath();
+      textureContext.fill();
+      texture.needsUpdate = true;
     }
     else {
-      textureContext.strokeStyle = 'rgb(0,0,255)';
+      textureContext.strokeStyle = lineColor;
       textureContext.lineCap = 'round';
-      textureContext.lineWidth = 50;
+      textureContext.lineWidth = lineWidth;
       textureContext.beginPath();
       textureContext.moveTo(mouseLastPoint.x, mouseLastPoint.y);
       textureContext.lineTo(x, y);
@@ -241,7 +247,10 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
 
   renderer.domElement.addEventListener('mousedown', function(event) {
     if (paper.material.opacity === 0) return
-    ifOnPaperDo(event, function(obj) {drawing = true});
+    ifOnPaperDo(event, function(obj) {
+      drawing = true;
+      if (mode === 'pen') drawLine(obj.point);
+    });
   });
 
   renderer.domElement.addEventListener('mousemove', function(event) {
@@ -263,7 +272,10 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
 
   renderer.domElement.addEventListener('touchstart', function(event) {
     if (paper.material.opacity === 0) return
-    ifOnPaperDo(event.touches[0], function(obj) {drawing = true});
+    ifOnPaperDo(event.touches[0], function(obj) {
+      drawing = true;
+      if (mode === 'pen') drawLine(obj.point);
+    });
   });
 
   renderer.domElement.addEventListener('touchmove', function(event) {
