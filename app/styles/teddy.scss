@@ -11,3 +11,16 @@ button {
 canvas {
   overflow:hidden;
 }
+.now-making {
+  color:white;
+  font-size:3em;
+  left:0;
+  height:100%;
+  text-align:center;
+  text-shadow: 0 0 10px black;
+  top:0;
+  padding-top:20%;
+  position:absolute;
+  width:100%;
+  z-index:10;
+}

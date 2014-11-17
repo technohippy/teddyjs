@@ -21,6 +21,9 @@ Teddy.UI.addTextureCanvas = function(textureWidth, textureHeight) {
 Teddy.UI.setup = function(scene, renderer, camera, paper) {
   var controls = new THREE.OrbitControls(camera);
   controls.enabled = false;
+  var nowMakingDialog = document.createElement('div');
+  nowMakingDialog.classList.add('now-making');
+  nowMakingDialog.textContent = 'Now Building...';
   var textureWidth = 600;
   var textureHeight = 600;
   var canvas = Teddy.UI.addTextureCanvas(textureWidth, textureHeight);
@@ -80,7 +83,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   }
 
   function make3D() {
-    if (currentMesh) scene.remove(currentMesh);
+    document.body.appendChild(nowMakingDialog);
     firstScissorsPoint.position.set(-1000, -1000, -1000);
     firstScissorsPoint.rotation.x = 0;
     firstScissorsPoint.rotation.y = 0;
@@ -90,7 +93,9 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     lines = [];
     var teddy = new Teddy.Body(points);
     try {
-      currentMesh = teddy.getMesh();
+      var newMesh = teddy.getMesh();
+      if (currentMesh) scene.remove(currentMesh);
+      currentMesh = newMesh;
 
       var geometry = currentMesh.geometry;
       geometry.faces.forEach(function(face) {
@@ -110,6 +115,9 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
       console.log(e);
       alert('Fail to create 3D mesh');
       return;
+    }
+    finally {
+      document.body.removeChild(nowMakingDialog);
     }
     scene.add(currentMesh);
     //teddy.debugAddSpineMeshes(scene);
