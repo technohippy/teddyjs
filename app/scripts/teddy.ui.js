@@ -176,6 +176,11 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
         }
       }
 
+      if (checkLinesIntersection(point, points)) {
+        // finish cutting
+        return false;
+      }
+
       points.push(point);
 
       if (2 <= points.length) {
@@ -186,12 +191,36 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
         scene.add(line);
         lines.push(line);
       }
-
-      if (5 < points.length && firstScissorsPoint.position.clone().setZ(0).distanceTo(point) < 0.1) {
-        //make3D();
-        return;
-      }
     }
+    return true;
+  }
+
+  function checkLinesIntersection(point, points) {
+    if (points.length < 3) return false;
+    var checkLine = [point, points[points.length-1]];
+    for (var i = 1; i < points.length-2; i++) {
+      if (checkLineIntersection(checkLine, [points[i-1], points[i]])) return true;
+    }
+    return false;
+  }
+  
+  function checkLineIntersection(line1, line2) {
+    var p10 = line1[0];
+    var p11 = line1[1];
+    var p20 = line2[0];
+    var p21 = line2[1];
+    if (p10.x < p20.x && p10.x < p21.x && p11.x < p20.x && p11.x < p21.x) return false;
+    if (p20.x < p10.x && p21.x < p10.x && p20.x < p11.x && p21.x < p11.x) return false;
+    if (p10.y < p20.y && p10.y < p21.y && p11.y < p20.y && p11.y < p21.y) return false;
+    if (p20.y < p10.y && p21.y < p10.y && p20.y < p11.y && p21.y < p11.y) return false;
+    var v11_10 = p10.clone().sub(p11);
+    var v11_20 = p20.clone().sub(p11);
+    var v11_21 = p21.clone().sub(p11);
+    var v21_20 = p20.clone().sub(p21);
+    var v21_10 = p10.clone().sub(p21);
+    var v21_11 = p11.clone().sub(p21);
+    if (v11_10.cross(v11_20).z * v11_10.cross(v11_21).z <= 0 && v21_20.cross(v21_10).z * v21_20.cross(v21_11).z <= 0) return true;
+    return false;
   }
 
   function clear() {
@@ -258,8 +287,19 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     if (!drawing) return;
 
     ifOnPaperDo(event, function(obj) {
-      if (mode === 'pen') drawLine(obj.point);
-      else if (mode === 'scissors') cutLine(obj.point);
+      if (mode === 'pen') {
+        drawLine(obj.point);
+      }
+      else if (mode === 'scissors') {
+        var ret = cutLine(obj.point)
+        console.log(ret);
+        if (!ret) {
+//        if (!cutLine(obj.point)) {
+          console.log('>>>');
+          drawing = false;
+          mouseLastPoint = undefined;
+        }
+      }
     });
   });
 
@@ -283,8 +323,15 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     if (!drawing) return;
 
     ifOnPaperDo(event.touches[0], function(obj) {
-      if (mode === 'pen') drawLine(obj.point);
-      else if (mode === 'scissors') cutLine(obj.point);
+      if (mode === 'pen') {
+        drawLine(obj.point);
+      }
+      else if (mode === 'scissors') {
+        if (!cutLine(obj.point)) {
+          drawing = false;
+          mouseLastPoint = undefined;
+        }
+      }
     });
   });
 };
