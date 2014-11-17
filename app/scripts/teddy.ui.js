@@ -154,7 +154,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   }
 
   function cutLine(point) {
-    if (points.length ==- 0) {
+    if (points.length == 0) {
       firstScissorsPoint.position.copy(point).setZ(0.2);
     }
     firstScissorsPoint.rotation.x += 0.05;
@@ -256,6 +256,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     mode = 'scissors';
     drawing = false;
     points = [];
+    lines.forEach(function(line) {scene.remove(line)});
     lines = [];
   });
 
