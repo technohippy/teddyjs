@@ -255,6 +255,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
       video.style.position = 'absolute';
       video.style.top = (-textureHeight) + 'px';
       video.style.left = 0;
+      video.style.display = 'none';
       document.body.appendChild(video);
       navigator.getUserMedia(
         {video:true},
