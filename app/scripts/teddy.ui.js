@@ -263,23 +263,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
           video.src = window.URL.createObjectURL(localMediaStream);
           video.play();
           setTimeout(function() {
-            var vw = video.videoWidth;
-            var vh = video.videoHeight;
-            var sx, sy, sw, sh;
-            if (vh < vw) {
-              sx = (vw - vh) / 2;
-              sy = 0;
-              sw = vh;
-              sh = vh;
-            }
-            else {
-              sx = 0;
-              sy = (vh - vw) / 2;
-              sw = vw;
-              sh = vw;
-            }
-            textureContext.drawImage(video, sx, sy, sw, sh, 0, 0, textureWidth, textureHeight);
-            texture.needsUpdate = true;
+            takeInVideo(video);
           }, 3000);
         },
         function(error) {
@@ -288,24 +272,28 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
       );
     }
     else {
-      var vw = video.videoWidth;
-      var vv = video.videoHeight;
-      var sx, sy, sw, sh;
-      if (vh < vw) {
-        sx = (vw - vh) / 2;
-        sy = 0;
-        sw = vh;
-        sh = vh;
-      }
-      else {
-        sx = 0;
-        sy = (vh - vw) / 2;
-        sw = vw;
-        sh = vw;
-      }
-      textureContext.drawImage(video, sx, sy, sw, sh, 0, 0, textureWidth, textureHeight);
-      texture.needsUpdate = true;
+      takeInVideo(video);
     }
+  }
+
+  function takeInVideo(video) {
+    var vw = video.videoWidth;
+    var vh = video.videoHeight;
+    var sx, sy, sw, sh;
+    if (vh < vw) {
+      sx = (vw - vh) / 2;
+      sy = 0;
+      sw = vh;
+      sh = vh;
+    }
+    else {
+      sx = 0;
+      sy = (vh - vw) / 2;
+      sw = vw;
+      sh = vw;
+    }
+    textureContext.drawImage(video, sx, sy, sw, sh, 0, 0, textureWidth, textureHeight);
+    texture.needsUpdate = true;
   }
 
   var mode = 'pen';
