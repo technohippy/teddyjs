@@ -1,3 +1,8 @@
+navigator.getUserMedia = (navigator.getUserMedia ||
+                          navigator.webkitGetUserMedia ||
+                          navigator.mozGetUserMedia ||
+                          navigator.msGetUserMedia);
+
 var Teddy = Teddy || {};
 
 Teddy.UI = {};
@@ -243,6 +248,39 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     controls.enabled = false;
   }
 
+  var video;
+  function takePhoto() {
+    if (typeof video === 'undefined') {
+      video = document.createElement('video');
+      video.style.position = 'absolute';
+      video.style.top = (-textureHeight) + 'px';
+      video.style.left = 0;
+      document.body.appendChild(video);
+      navigator.getUserMedia(
+        {video:true},
+        function(localMediaStream) {
+          video.src = window.URL.createObjectURL(localMediaStream);
+          video.play();
+          setTimeout(function() {
+            var vw = video.videoWidth;
+            var vh = video.videoHeight;
+            textureContext.drawImage(video, (vw - vh) / 2, 0, vh, vh, 0, 0, textureWidth, textureHeight);
+            texture.needsUpdate = true;
+          }, 3000);
+        },
+        function(error) {
+          console.log(error);
+        }
+      );
+    }
+    else {
+      var vw = video.videoWidth;
+      var vv = video.videoHeight;
+      textureContext.drawImage(video, (vw - vh) / 2, 0, vh, vh, 0, 0, textureWidth, textureHeight);
+      texture.needsUpdate = true;
+    }
+  }
+
   var mode = 'pen';
   var mouseLastPoint = undefined;
 
@@ -266,6 +304,10 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
 
   document.getElementById('clear-button').addEventListener('click', function(event) {
     clear();
+  });
+
+  document.getElementById('camera-button').addEventListener('click', function(event) {
+    takePhoto();
   });
 
   renderer.domElement.addEventListener('mouseup', function(event) {
@@ -292,11 +334,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
         drawLine(obj.point);
       }
       else if (mode === 'scissors') {
-        var ret = cutLine(obj.point)
-        console.log(ret);
-        if (!ret) {
-//        if (!cutLine(obj.point)) {
-          console.log('>>>');
+        if (!cutLine(obj.point)) {
           drawing = false;
           mouseLastPoint = undefined;
         }
