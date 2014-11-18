@@ -178,6 +178,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
 
       if (checkLinesIntersection(point, points)) {
         // finish cutting
+        // TODO: something wrong
         return false;
       }
 
