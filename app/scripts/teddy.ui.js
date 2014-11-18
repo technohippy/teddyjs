@@ -260,6 +260,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
         {video:true},
         function(localMediaStream) {
           video.src = window.URL.createObjectURL(localMediaStream);
+          video.autoplay = true;
           video.play();
           setTimeout(function() {
             takeInVideo(video);
