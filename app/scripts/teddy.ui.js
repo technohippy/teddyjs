@@ -1,8 +1,3 @@
-navigator.getUserMedia = (navigator.getUserMedia ||
-                          navigator.webkitGetUserMedia ||
-                          navigator.mozGetUserMedia ||
-                          navigator.msGetUserMedia);
-
 var Teddy = Teddy || {};
 
 Teddy.UI = {};
@@ -248,6 +243,10 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     controls.enabled = false;
   }
 
+  navigator.getUserMedia = (navigator.getUserMedia ||
+                            navigator.webkitGetUserMedia ||
+                            navigator.mozGetUserMedia ||
+                            navigator.msGetUserMedia);
   var video;
   function takePhoto() {
     if (typeof video === 'undefined') {
