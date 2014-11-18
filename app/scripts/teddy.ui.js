@@ -49,7 +49,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   //scene.add(firstScissorsPoint);
 
   var drawing = false;
-  var points = [];
+  var contour = [];
   var lines = [];
   var currentMesh = undefined;
   var projector = new THREE.Projector();
@@ -92,7 +92,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     drawing = false;
     lines.forEach(function(line) {scene.remove(line)});
     lines = [];
-    var teddy = new Teddy.Body(points);
+    var teddy = new Teddy.Body(contour);
     try {
       var newMesh = teddy.getMesh();
       if (currentMesh) scene.remove(currentMesh);
@@ -112,7 +112,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
       currentMesh.material.map = texture;
     }
     catch (e) {
-      points = [];
+      contour = [];
       console.log(e);
       alert('Fail to create 3D mesh');
       return;
@@ -120,7 +120,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     scene.add(currentMesh);
     //teddy.debugAddSpineMeshes(scene);
 
-    points = [];
+    contour = [];
     paper.material.opacity = 0;
     controls.enabled = true;
   }
@@ -154,40 +154,40 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   }
 
   function cutLine(point) {
-    if (points.length == 0) {
+    if (contour.length == 0) {
       firstScissorsPoint.position.copy(point).setZ(0.2);
     }
     firstScissorsPoint.rotation.x += 0.05;
     firstScissorsPoint.rotation.y += 0.025;
     firstScissorsPoint.rotation.z += 0.0125;
 
-    if (points.length == 0 || 0.1 < points[points.length - 1].distanceTo(point)) {
+    if (contour.length == 0 || 0.1 < contour[contour.length - 1].distanceTo(point)) {
       // avoid collinear
-      while (2 <= points.length) {
-        var p01 = point.clone().sub(points[points.length - 1]);
-        var p02 = point.clone().sub(points[points.length - 2]);
+      while (2 <= contour.length) {
+        var p01 = point.clone().sub(contour[contour.length - 1]);
+        var p02 = point.clone().sub(contour[contour.length - 2]);
         var deg = Math.acos(p01.dot(p02) / p01.length() / p02.length()) / Math.PI * 180;
         if (deg < 1) {
           scene.remove(lines.pop());
-          points.pop();
+          contour.pop();
         }
         else {
           break;
         }
       }
 
-      if (checkLinesIntersection(point, points)) {
+      if (checkLinesIntersection(point, contour)) {
         // finish cutting
         // TODO: something wrong
         return false;
       }
 
-      points.push(point);
+      contour.push(point);
 
-      if (2 <= points.length) {
+      if (2 <= contour.length) {
         var lineGeometry = new THREE.Geometry();
-        lineGeometry.vertices.push(points[points.length - 1].clone().setZ(0.01));
-        lineGeometry.vertices.push(points[points.length - 2].clone().setZ(0.01));
+        lineGeometry.vertices.push(contour[contour.length - 1].clone().setZ(0.01));
+        lineGeometry.vertices.push(contour[contour.length - 2].clone().setZ(0.01));
         var line = new THREE.Line(lineGeometry, lineMaterial);
         scene.add(line);
         lines.push(line);
@@ -196,11 +196,11 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     return true;
   }
 
-  function checkLinesIntersection(point, points) {
-    if (points.length < 3) return false;
-    var checkLine = [point, points[points.length-1]];
-    for (var i = 1; i < points.length-2; i++) {
-      if (checkLineIntersection(checkLine, [points[i-1], points[i]])) return true;
+  function checkLinesIntersection(point, contour) {
+    if (contour.length < 3) return false;
+    var checkLine = [point, contour[contour.length-1]];
+    for (var i = 1; i < contour.length-2; i++) {
+      if (checkLineIntersection(checkLine, [contour[i-1], contour[i]])) return true;
     }
     return false;
   }
@@ -229,7 +229,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     mouseLastPoint = undefined;
     firstScissorsPoint.position.set(-1000, -1000, -1000);
     drawing = false;
-    points = [];
+    contour = [];
     if (currentMesh) scene.remove(currentMesh);
     currentMesh = undefined;
     lines.forEach(function(line) {scene.remove(line)});
@@ -309,7 +309,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   document.getElementById('scissors-button').addEventListener('click', function(event) {
     mode = 'scissors';
     drawing = false;
-    points = [];
+    contour = [];
     lines.forEach(function(line) {scene.remove(line)});
     lines = [];
   });
