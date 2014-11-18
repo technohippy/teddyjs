@@ -265,7 +265,20 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
           setTimeout(function() {
             var vw = video.videoWidth;
             var vh = video.videoHeight;
-            textureContext.drawImage(video, (vw - vh) / 2, 0, vh, vh, 0, 0, textureWidth, textureHeight);
+            var sx, sy, sw, sh;
+            if (vh < vw) {
+              sx = (vw - vh) / 2;
+              sy = 0;
+              sw = vh;
+              sh = vh;
+            }
+            else {
+              sx = 0;
+              sy = (vh - vw) / 2;
+              sw = vw;
+              sh = vw;
+            }
+            textureContext.drawImage(video, sx, sy, sw, sh, 0, 0, textureWidth, textureHeight);
             texture.needsUpdate = true;
           }, 3000);
         },
@@ -277,7 +290,20 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     else {
       var vw = video.videoWidth;
       var vv = video.videoHeight;
-      textureContext.drawImage(video, (vw - vh) / 2, 0, vh, vh, 0, 0, textureWidth, textureHeight);
+      var sx, sy, sw, sh;
+      if (vh < vw) {
+        sx = (vw - vh) / 2;
+        sy = 0;
+        sw = vh;
+        sh = vh;
+      }
+      else {
+        sx = 0;
+        sy = (vh - vw) / 2;
+        sw = vw;
+        sh = vw;
+      }
+      textureContext.drawImage(video, sx, sy, sw, sh, 0, 0, textureWidth, textureHeight);
       texture.needsUpdate = true;
     }
   }
