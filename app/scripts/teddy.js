@@ -497,6 +497,32 @@ Teddy.Body.prototype.getMesh = function() {
   return this.mesh;
 };
 
+Teddy.Body.prototype.getMeshAsync = function(successHandler, errorHandler) {
+  if (!this.mesh) {
+    var worker = new Worker('scripts/teddy.worker.js');
+    worker.addEventListener('message', function(event) {
+      var geometry = new THREE.Geometry();
+      if (event.data.status) {
+        var geometryData = event.data.geometry;
+        for (var key in geometryData) {
+          if (key === 'id' || key === 'uuid') continue;
+          geometry[key] = geometryData[key];
+        }
+
+        this.mesh = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial({color: 0xffffff, wireframe:false}));
+        successHandler(this);
+      }
+      else {
+        errorHandler(event.data.error);
+      }
+    }.bind(this));
+    worker.postMessage(this.points);
+  }
+  else {
+    successHandler(this);
+  }
+};
+
 Teddy.Spine = function(body, joint1, joint2) {
   this.body = body;
   if (joint1 instanceof THREE.Vector3) joint1 = this.body.getPointIndex(joint1);

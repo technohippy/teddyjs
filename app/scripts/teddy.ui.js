@@ -97,14 +97,22 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     drawing = false;
     clearLines();
     currentLines = [];
+    var countContours = contours.length;
+    var processedContours = 0;
+    nowMakingDialog.style.display = 'block';
     contours.forEach(function(currentContour) {
-      if (currentContour.length === 0) return; // TODO: そもそも登録しないようにする
+      if (currentContour.length === 0) {
+        // TODO: この処理をまとめたい 1
+        processedContours++;
+        if (countContours === processedContours) {
+          nowMakingDialog.style.display = 'none';
+        }
+        return; // TODO: そもそも登録しないようにする
+      }
 
       var teddy = new Teddy.Body(currentContour);
-      try {
-        var newMesh = teddy.getMesh();
-        currentMesh = newMesh;
-
+      teddy.getMeshAsync(function(_) {
+        currentMesh = teddy.mesh;
         var geometry = currentMesh.geometry;
         geometry.faces.forEach(function(face) {
           var pa = geometry.vertices[face.a];
@@ -119,15 +127,24 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
         currentMesh.material.map = texture;
         scene.add(currentMesh);
         //teddy.debugAddSpineMeshes(scene);
-      }
-      catch (e) {
+
+        // TODO: この処理をまとめたい 2
+        processedContours++;
+        if (countContours === processedContours) {
+          nowMakingDialog.style.display = 'none';
+        }
+      }, function(e) {
+        // TODO: この処理をまとめたい 3
+        processedContours++;
+        if (countContours === processedContours) {
+          nowMakingDialog.style.display = 'none';
+        }
+
         contours[contours.length - 1] = [];
         console.log(e);
-        alert('Fail to create 3D mesh');
-        return;
-      }
+        alert('Fail to create a 3D mesh');
+      });
     }, this);
-
     contours = [];
     paper.material.opacity = 0;
     controls.enabled = true;
