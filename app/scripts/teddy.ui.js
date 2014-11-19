@@ -103,7 +103,6 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
       var teddy = new Teddy.Body(currentContour);
       try {
         var newMesh = teddy.getMesh();
-//        if (currentMesh) scene.remove(currentMesh);
         currentMesh = newMesh;
 
         var geometry = currentMesh.geometry;
@@ -129,7 +128,6 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
       }
     }, this);
 
-    //contours.push([]);
     contours = [];
     paper.material.opacity = 0;
     controls.enabled = true;
@@ -239,7 +237,6 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     mouseLastPoint = undefined;
     firstScissorsPoint.position.set(-1000, -1000, -1000);
     drawing = false;
-    contours.push([]);
     if (typeof reserveMesh === 'undefined') {
       textureContext.fillStyle = 'rgb(255,255,255)';
       textureContext.fillRect(0, 0, textureWidth, textureHeight);
@@ -248,8 +245,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
       clearMeshes();
       clearLines();
     }
-    else {
-    }
+    contours = [];
     currentLines = [];
     paper.material.opacity = 1;
     camera.position.set(0, 0, 8);
