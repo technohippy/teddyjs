@@ -97,16 +97,20 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     drawing = false;
     clearLines();
     currentLines = [];
+
     var countContours = contours.length;
     var processedContours = 0;
     nowMakingDialog.style.display = 'block';
+    function checkMaking() {
+      processedContours++;
+      if (countContours === processedContours) {
+        nowMakingDialog.style.display = 'none';
+      }
+    }
+
     contours.forEach(function(currentContour) {
       if (currentContour.length === 0) {
-        // TODO: この処理をまとめたい 1
-        processedContours++;
-        if (countContours === processedContours) {
-          nowMakingDialog.style.display = 'none';
-        }
+        checkMaking();
         return; // TODO: そもそも登録しないようにする
       }
 
@@ -127,23 +131,11 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
         currentMesh.material.map = texture;
         scene.add(currentMesh);
         //teddy.debugAddSpineMeshes(scene);
-
-        // TODO: この処理をまとめたい 2
-        processedContours++;
-        if (countContours === processedContours) {
-          nowMakingDialog.style.display = 'none';
-        }
       }, function(e) {
-        // TODO: この処理をまとめたい 3
-        processedContours++;
-        if (countContours === processedContours) {
-          nowMakingDialog.style.display = 'none';
-        }
-
         contours[contours.length - 1] = [];
         console.log(e);
         alert('Fail to create a 3D mesh');
-      });
+      }, checkMaking);
     }, this);
     contours = [];
     paper.material.opacity = 0;

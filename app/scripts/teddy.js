@@ -497,7 +497,7 @@ Teddy.Body.prototype.getMesh = function() {
   return this.mesh;
 };
 
-Teddy.Body.prototype.getMeshAsync = function(successHandler, errorHandler) {
+Teddy.Body.prototype.getMeshAsync = function(successHandler, errorHandler, afterHandler) {
   if (!this.mesh) {
     var worker = new Worker('scripts/teddy.worker.js');
     worker.addEventListener('message', function(event) {
@@ -511,15 +511,18 @@ Teddy.Body.prototype.getMeshAsync = function(successHandler, errorHandler) {
 
         this.mesh = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial({color: 0xffffff, wireframe:false}));
         successHandler(this);
+        afterHandler(this);
       }
       else {
         errorHandler(event.data.error);
+        afterHandler(this);
       }
     }.bind(this));
     worker.postMessage(this.points);
   }
   else {
     successHandler(this);
+    afterHandler(this);
   }
 };
 
