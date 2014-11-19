@@ -49,8 +49,8 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   //scene.add(firstScissorsPoint);
 
   var drawing = false;
-  var contour = [];
-  var lines = [];
+  var contours = [];
+  var currentLines = [];
   var currentMesh = undefined;
   var projector = new THREE.Projector();
   var rDeg = 0;
@@ -68,6 +68,11 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     lineColor.b = Math.sin(bDeg/180*Math.PI);
     lineMaterial.color.copy(lineColor);
   })();
+
+  function getCurrentContour() {
+    if (contours.length === 0) contours.push([]);
+    return contours[contours.length - 1];
+  }
 
   function ifOnPaperDo(event, handler) {
     var rect = event.target.getBoundingClientRect();
@@ -90,37 +95,42 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     firstScissorsPoint.rotation.y = 0;
     firstScissorsPoint.rotation.z = 0;
     drawing = false;
-    lines.forEach(function(line) {scene.remove(line)});
-    lines = [];
-    var teddy = new Teddy.Body(contour);
-    try {
-      var newMesh = teddy.getMesh();
-      if (currentMesh) scene.remove(currentMesh);
-      currentMesh = newMesh;
+    clearLines();
+    currentLines = [];
+    contours.forEach(function(currentContour) {
+      if (currentContour.length === 0) return; // TODO: そもそも登録しないようにする
 
-      var geometry = currentMesh.geometry;
-      geometry.faces.forEach(function(face) {
-        var pa = geometry.vertices[face.a];
-        var pb = geometry.vertices[face.b];
-        var pc = geometry.vertices[face.c];
-        geometry.faceVertexUvs[0].push([
-          new THREE.Vector2((pa.x + 4)/8, (pa.y + 4)/8),
-          new THREE.Vector2((pb.x + 4)/8, (pb.y + 4)/8),
-          new THREE.Vector2((pc.x + 4)/8, (pc.y + 4)/8)
-        ]);
-      }, this);
-      currentMesh.material.map = texture;
-    }
-    catch (e) {
-      contour = [];
-      console.log(e);
-      alert('Fail to create 3D mesh');
-      return;
-    }
-    scene.add(currentMesh);
-    //teddy.debugAddSpineMeshes(scene);
+      var teddy = new Teddy.Body(currentContour);
+      try {
+        var newMesh = teddy.getMesh();
+//        if (currentMesh) scene.remove(currentMesh);
+        currentMesh = newMesh;
 
-    contour = [];
+        var geometry = currentMesh.geometry;
+        geometry.faces.forEach(function(face) {
+          var pa = geometry.vertices[face.a];
+          var pb = geometry.vertices[face.b];
+          var pc = geometry.vertices[face.c];
+          geometry.faceVertexUvs[0].push([
+            new THREE.Vector2((pa.x + 4)/8, (pa.y + 4)/8),
+            new THREE.Vector2((pb.x + 4)/8, (pb.y + 4)/8),
+            new THREE.Vector2((pc.x + 4)/8, (pc.y + 4)/8)
+          ]);
+        }, this);
+        currentMesh.material.map = texture;
+        scene.add(currentMesh);
+        //teddy.debugAddSpineMeshes(scene);
+      }
+      catch (e) {
+        contours[contours.length - 1] = [];
+        console.log(e);
+        alert('Fail to create 3D mesh');
+        return;
+      }
+    }, this);
+
+    //contours.push([]);
+    contours = [];
     paper.material.opacity = 0;
     controls.enabled = true;
   }
@@ -154,49 +164,49 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   }
 
   function cutLine(point) {
-    if (contour.length == 0) {
+    if (getCurrentContour().length == 0) {
       firstScissorsPoint.position.copy(point).setZ(0.2);
     }
     firstScissorsPoint.rotation.x += 0.05;
     firstScissorsPoint.rotation.y += 0.025;
     firstScissorsPoint.rotation.z += 0.0125;
 
-    if (contour.length == 0 || 0.1 < contour[contour.length - 1].distanceTo(point)) {
+    if (getCurrentContour().length == 0 || 0.1 < getCurrentContour()[getCurrentContour().length - 1].distanceTo(point)) {
       // avoid collinear
-      while (2 <= contour.length) {
-        var p01 = point.clone().sub(contour[contour.length - 1]);
-        var p02 = point.clone().sub(contour[contour.length - 2]);
+      while (2 <= getCurrentContour().length) {
+        var p01 = point.clone().sub(getCurrentContour()[getCurrentContour().length - 1]);
+        var p02 = point.clone().sub(getCurrentContour()[getCurrentContour().length - 2]);
         var deg = Math.acos(p01.dot(p02) / p01.length() / p02.length()) / Math.PI * 180;
         if (deg < 1) {
-          scene.remove(lines.pop());
-          contour.pop();
+          scene.remove(currentLines.pop());
+          getCurrentContour().pop();
         }
         else {
           break;
         }
       }
 
-      if (checkLinesIntersection(point, contour)) {
+      if (checkcurrentLinesIntersection(point, getCurrentContour())) {
         // finish cutting
         // TODO: something wrong
         return false;
       }
 
-      contour.push(point);
+      getCurrentContour().push(point);
 
-      if (2 <= contour.length) {
+      if (2 <= getCurrentContour().length) {
         var lineGeometry = new THREE.Geometry();
-        lineGeometry.vertices.push(contour[contour.length - 1].clone().setZ(0.01));
-        lineGeometry.vertices.push(contour[contour.length - 2].clone().setZ(0.01));
+        lineGeometry.vertices.push(getCurrentContour()[getCurrentContour().length - 1].clone().setZ(0.01));
+        lineGeometry.vertices.push(getCurrentContour()[getCurrentContour().length - 2].clone().setZ(0.01));
         var line = new THREE.Line(lineGeometry, lineMaterial);
         scene.add(line);
-        lines.push(line);
+        currentLines.push(line);
       }
     }
     return true;
   }
 
-  function checkLinesIntersection(point, contour) {
+  function checkcurrentLinesIntersection(point, contour) {
     if (contour.length < 3) return false;
     var checkLine = [point, contour[contour.length-1]];
     for (var i = 1; i < contour.length-2; i++) {
@@ -224,24 +234,46 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     return false;
   }
 
-  function clear() {
+  function clear(reserveMesh) {
     mode = 'pen';
     mouseLastPoint = undefined;
     firstScissorsPoint.position.set(-1000, -1000, -1000);
     drawing = false;
-    contour = [];
-    if (currentMesh) scene.remove(currentMesh);
-    currentMesh = undefined;
-    lines.forEach(function(line) {scene.remove(line)});
-    lines = [];
+    contours.push([]);
+    if (typeof reserveMesh === 'undefined') {
+      textureContext.fillStyle = 'rgb(255,255,255)';
+      textureContext.fillRect(0, 0, textureWidth, textureHeight);
+      texture.needsUpdate = true;
+      currentMesh = undefined;
+      clearMeshes();
+      clearLines();
+    }
+    else {
+    }
+    currentLines = [];
     paper.material.opacity = 1;
-    textureContext.fillStyle = 'rgb(255,255,255)';
-    textureContext.fillRect(0, 0, textureWidth, textureHeight);
-    texture.needsUpdate = true;
     camera.position.set(0, 0, 8);
     camera.lookAt(0, 0, 0);
     controls.reset();
     controls.enabled = false;
+  }
+
+  function clearMeshes() {
+    var allMeshes = [];
+    scene.children.forEach(function(child) {
+      if (child instanceof THREE.Mesh && !(child.geometry instanceof THREE.PlaneGeometry)) {
+        allMeshes.push(child);
+      }
+    }, this);
+    allMeshes.forEach(function(mesh) {scene.remove(mesh)});
+  }
+
+  function clearLines() {
+    var allLines = [];
+    scene.children.forEach(function(child) {
+      if (child instanceof THREE.Line) allLines.push(child);
+    }, this);
+    allLines.forEach(function(line) {scene.remove(line)});
   }
 
   navigator.getUserMedia = (navigator.getUserMedia ||
@@ -301,6 +333,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   var mouseLastPoint = undefined;
 
   document.getElementById('pen-button').addEventListener('click', function(event) {
+    clear(true);
     mode = 'pen';
     drawing = false;
     mouseLastPoint = undefined;
@@ -309,9 +342,9 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   document.getElementById('scissors-button').addEventListener('click', function(event) {
     mode = 'scissors';
     drawing = false;
-    contour = [];
-    lines.forEach(function(line) {scene.remove(line)});
-    lines = [];
+    contours.push([]);
+    currentLines.forEach(function(line) {scene.remove(line)});
+    currentLines = [];
   });
 
   document.getElementById('teddy-button').addEventListener('click', function(event) {
@@ -330,6 +363,8 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     if (paper.material.opacity === 0) return
     //make3D();
     drawing = false;
+    contours.push([]);
+    currentLines = [];
     mouseLastPoint = undefined;
   });
 
@@ -362,6 +397,8 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     if (paper.material.opacity === 0) return
     //make3D();
     drawing = false;
+    contours.push([]);
+    currentLines = [];
     mouseLastPoint = undefined;
   });
 

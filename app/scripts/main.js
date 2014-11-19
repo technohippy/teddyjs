@@ -31,10 +31,12 @@ window.addEventListener('resize', function() {
   camera.updateProjectionMatrix();
 }, false);
 
+/*
 document.addEventListener('keyup', function(event) {
   if (event.keyCode === 13) { // enter key
     window.location.reload();
   }
 });
+*/
 
 })();
