@@ -11,6 +11,7 @@ Teddy.Body = function(points) {
   this.triangles = [];
   this.spines = [];
   this.mesh = undefined;
+  this.material = new THREE.MeshPhongMaterial({color: 0xffffff, wireframe:false});
 };
 
 Teddy.Body.prototype.onOutline = function(pointId) {
@@ -509,7 +510,7 @@ Teddy.Body.prototype.getMeshAsync = function(successHandler, errorHandler, after
           geometry[key] = geometryData[key];
         }
 
-        this.mesh = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial({color: 0xffffff, wireframe:false}));
+        this.mesh = new THREE.Mesh(geometry, this.material);
         successHandler(this);
         afterHandler(this);
       }

@@ -95,8 +95,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     firstScissorsPoint.rotation.y = 0;
     firstScissorsPoint.rotation.z = 0;
     drawing = false;
-    clearLines();
-    currentLines = [];
+    paper.material.opacity = 0;
 
     var countContours = contours.length;
     var processedContours = 0;
@@ -104,7 +103,12 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     function checkMaking() {
       processedContours++;
       if (countContours === processedContours) {
+        clearLines();
+        currentLines = [];
         nowMakingDialog.style.display = 'none';
+        contours = [];
+//        paper.material.opacity = 0;
+        controls.enabled = true;
       }
     }
 
@@ -137,9 +141,6 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
         alert('Fail to create a 3D mesh');
       }, checkMaking);
     }, this);
-    contours = [];
-    paper.material.opacity = 0;
-    controls.enabled = true;
   }
 
   function drawLine(point) {
