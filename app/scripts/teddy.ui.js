@@ -56,9 +56,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   var currentLines = [];
   var currentMesh = undefined;
   var projector = new THREE.Projector();
-  var rDeg = 0;
-  var gDeg = 0;
-  var bDeg = 0;
+  var rDeg = 0, gDeg = 0, bDeg = 0;
   var lineColor = new THREE.Color(Math.sin(rDeg/180*Math.PI), Math.sin(gDeg/180*Math.PI), Math.sin(bDeg/180*Math.PI));
   var lineMaterial = new THREE.LineBasicMaterial({color: lineColor});
   (function changeLineColor() {
@@ -90,6 +88,44 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     if (objs.length == 1) {
       handler(objs[0]);
     }
+  }
+
+  function retrieveOutline() {
+    var imageData = textureContext.getImageData(0, 0, textureWidth, textureHeight);
+    var points = [];
+    var step = 5;
+    for (var x = 0; x < textureWidth; x += step) {
+      for (var y = 0; y < textureHeight; y += step) {
+        var index = (x + y * textureWidth) * 4;
+        var data = imageData.data;
+        if (data[index] != 255 
+            || data[index+1] != 255 
+            || data[index+2] != 255 
+            || data[index+3] != 255) {
+          points.push([x, y]);
+        }
+      }
+    }
+    var outline = hull(points, 10);
+    outline.forEach(function(point) {
+      cutLine(new THREE.Vector3(
+        point[0] / textureWidth * 8 - 4, 
+        (textureHeight - point[1]) * 8 / textureHeight - 4,
+        0
+      ));
+    }, this);
+    make3D();
+    /*
+    var prevPoint = outline.pop();
+    textureContext.lineWidth = 1;
+    textureContext.strokeStyle = 'rgba(255,0,0,255)';
+    textureContext.moveTo(prevPoint[0], prevPoint[1]);
+    outline.forEach(function(point) {
+      textureContext.lineTo(point[0], point[1]);
+    }, this);
+    textureContext.stroke();
+    texture.needsUpdate = true;
+    */
   }
   
   function make3D() {
@@ -367,9 +403,12 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     takePhoto();
   });
 
+  document.getElementById('hull-button').addEventListener('click', function(event) {
+    retrieveOutline();
+  });
+
   renderer.domElement.addEventListener('mouseup', function(event) {
     if (paper.material.opacity === 0) return
-    //make3D();
     drawing = false;
     contours.push([]);
     currentLines = [];
@@ -403,7 +442,6 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
 
   renderer.domElement.addEventListener('touchend', function(event) {
     if (paper.material.opacity === 0) return
-    //make3D();
     drawing = false;
     contours.push([]);
     currentLines = [];
