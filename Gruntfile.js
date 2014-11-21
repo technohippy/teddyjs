@@ -318,6 +318,20 @@ module.exports = function (grunt) {
                     ]
                 }]
             },
+            distWorker: {
+                files: [{
+                    expand: true,
+                    dot: true,
+                    cwd: '<%= config.app %>',
+                    dest: '<%= config.dist %>',
+                    src: [
+                        'bower_components/three.js/three.js', 
+                        'bower_components/poly2tri/dist/poly2tri.js', 
+                        'scripts/teddy.js',
+                        'scripts/teddy.worker.js'
+                    ]
+                }]
+            },
             styles: {
                 expand: true,
                 dot: true,
@@ -404,6 +418,7 @@ module.exports = function (grunt) {
         'copy:dist',
         'modernizr',
         'rev',
+        'copy:distWorker',
         'usemin',
         'htmlmin'
     ]);

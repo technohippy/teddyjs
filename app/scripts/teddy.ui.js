@@ -25,6 +25,9 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   nowMakingDialog.classList.add('now-making');
   nowMakingDialog.textContent = 'Now Building...';
   nowMakingDialog.style.display = 'none';
+  nowMakingDialog.addEventListener('click', function(event) {
+    nowMakingDialog.style.display = 'none';
+  });
   document.body.appendChild(nowMakingDialog);
   var textureWidth = 600;
   var textureHeight = 600;
@@ -107,7 +110,6 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
         currentLines = [];
         nowMakingDialog.style.display = 'none';
         contours = [];
-//        paper.material.opacity = 0;
         controls.enabled = true;
       }
     }
@@ -339,7 +341,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   var mouseLastPoint = undefined;
 
   document.getElementById('pen-button').addEventListener('click', function(event) {
-    clear(true);
+    if (paper.material.opacity === 0) clear(true);
     mode = 'pen';
     drawing = false;
     mouseLastPoint = undefined;
