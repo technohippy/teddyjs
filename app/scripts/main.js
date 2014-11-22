@@ -32,12 +32,14 @@ window.addEventListener('resize', function() {
   camera.updateProjectionMatrix();
 }, false);
 
-/*
 document.addEventListener('keyup', function(event) {
-  if (event.keyCode === 13) { // enter key
-    window.location.reload();
+  if (event.keyCode === 77) {
+    if (typeof Teddy.Body.instances !== 'undefined') {
+      Teddy.Body.instances.forEach(function(body) {
+        body.material.wireframe = !body.material.wireframe;
+      }, this);
+    }
   }
 });
-*/
 
 })();

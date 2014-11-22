@@ -12,7 +12,9 @@ Teddy.Body = function(points) {
   this.triangles = [];
   this.spines = [];
   this.mesh = undefined;
-  this.material = new THREE.MeshPhongMaterial({color: 0xffffff, wireframe:false});
+  this.material = new THREE.MeshPhongMaterial({color:0xffffff, wireframe:false});
+  if (Teddy.Body.insntaces === undefined) Teddy.Body.instances = [];
+  Teddy.Body.instances.push(this);
 };
 
 Teddy.Body.prototype.onOutline = function(pointId) {
