@@ -1,4 +1,5 @@
 // http://www-ui.is.s.u-tokyo.ac.jp/~takeo/papers/siggraph99.pdf
+'use strict';
 
 var Teddy = Teddy || {};
 
@@ -11,7 +12,9 @@ Teddy.Body = function(points) {
   this.triangles = [];
   this.spines = [];
   this.mesh = undefined;
-  this.material = new THREE.MeshPhongMaterial({color: 0xffffff, wireframe:false});
+  this.material = new THREE.MeshPhongMaterial({color:0xffffff, wireframe:false});
+  if (Teddy.Body.insntaces === undefined) Teddy.Body.instances = [];
+  Teddy.Body.instances.push(this);
 };
 
 Teddy.Body.prototype.onOutline = function(pointId) {
@@ -19,10 +22,10 @@ Teddy.Body.prototype.onOutline = function(pointId) {
 };
 
 Teddy.Body.prototype.isOutline = function(pointId1, pointId2) {
-  return this.onOutline(pointId1) 
-         && this.onOutline(pointId2) 
-         && ((Math.abs(pointId1 - pointId2) === 1) 
-             || (Math.abs(pointId1 - pointId2) === this.outlineSize - 1));
+  return this.onOutline(pointId1) &&
+         this.onOutline(pointId2) &&
+         ((Math.abs(pointId1 - pointId2) === 1) ||
+          (Math.abs(pointId1 - pointId2) === this.outlineSize - 1));
 };
 
 Teddy.Body.prototype.getPointIndex = function(x, y, z) {
@@ -93,7 +96,7 @@ Teddy.Body.prototype.retrieveSpines = function() {
     var c20 = new THREE.Vector3((p2.x + p0.x) / 2, (p2.y + p0.y) / 2, 0);
     var c012 = new THREE.Vector3((p0.x + p1.x + p2.x) / 3, (p0.y + p1.y + p2.y) / 3, 0);
 
-    var triangleType = (function(i, j, k) {
+    var triangleType = function(i, j, k) {
       var edges = [];
       if (this.isOutline(i, j)) edges.push([0, 1]);
       if (this.isOutline(j, k)) edges.push([1, 2]);
@@ -105,39 +108,40 @@ Teddy.Body.prototype.retrieveSpines = function() {
         case 2: return {type:'t', edges:edges};
         default: throw 'error';
       }
-    }).bind(this)(t0, t1, t2);
+    }.bind(this)(t0, t1, t2);
 
+    var spine;
     switch (triangleType.type) {
       case 't':
         if (triangleType.edges.toString() === '0,1,1,2') {
-          var spine = new Teddy.Spine(this, p1, c20);
+          spine = new Teddy.Spine(this, p1, c20);
           spine.addTriangle({triangle:triangle, edges:triangleType.edges, links:[[2,0]]});
           this.addSpine(spine);
         }
         else if (triangleType.edges.toString() === '1,2,2,0') {
-          var spine = new Teddy.Spine(this, p2, c01);
+          spine = new Teddy.Spine(this, p2, c01);
           spine.addTriangle({triangle:triangle, edges:triangleType.edges, links:[[0,1]]});
           this.addSpine(spine);
         }
         else if (triangleType.edges.toString() === '0,1,2,0') {
-          var spine = new Teddy.Spine(this, p0, c12);
+          spine = new Teddy.Spine(this, p0, c12);
           spine.addTriangle({triangle:triangle, edges:triangleType.edges, links:[[1,2]]});
           this.addSpine(spine);
         }
         break;
       case 's':
         if (triangleType.edges.toString() === '0,1') {
-          var spine = new Teddy.Spine(this, c12, c20);
+          spine = new Teddy.Spine(this, c12, c20);
           spine.addTriangle({triangle:triangle, edges:triangleType.edges, links:[[1,2], [2,0]]});
           this.addSpine(spine);
         }
         else if (triangleType.edges.toString() === '1,2') {
-          var spine = new Teddy.Spine(this, c20, c01);
+          spine = new Teddy.Spine(this, c20, c01);
           spine.addTriangle({triangle:triangle, edges:triangleType.edges, links:[[2,0], [0,1]]});
           this.addSpine(spine);
         }
         else if (triangleType.edges.toString() === '2,0') {
-          var spine = new Teddy.Spine(this, c01, c12);
+          spine = new Teddy.Spine(this, c01, c12);
           spine.addTriangle({triangle:triangle, edges:triangleType.edges, links:[[0,1], [1,2]]});
           this.addSpine(spine);
         }
@@ -174,7 +178,7 @@ Teddy.Body.prototype.prunSpines = function() {
       currentJoint = currentSpine.getNextJoint(currentJoint);
 
       var linkPointIds = currentSpine.getEdgeIdsIncluding(currentJoint.getPoint());
-      var linkPoints = linkPointIds.map((function(id) {return this.points[id]}).bind(this));
+      var linkPoints = linkPointIds.map(function(id) {return this.points[id];}.bind(this));
       var center = currentJoint.getPoint();
       var distance = center.distanceTo(linkPoints[0]);
       currentSpine.getAllPointIdsWithoutIds(linkPointIds).forEach(function(pointId) {
@@ -245,13 +249,13 @@ Teddy.Body.prototype.prunSpines = function() {
       else if (currentSpine.isTerminal()) {
         throw 'ERROR: cannot handle this geometry';
       }
-    } while (typeof currentSpine !== 'undefined'); 
+    } while (typeof currentSpine !== 'undefined');
   }, this);
 
   prunedSpines.map(function(spine) {
     return this.spines.indexOf(spine);
   }, this).sort(function(a, b) {
-    return a === b ? 0 : a < b ? 1 : -1
+    return a === b ? 0 : a < b ? 1 : -1;
   }).forEach(function(id) {
     this.spines.splice(id, 1);
   }, this);
@@ -356,9 +360,9 @@ Teddy.Body.prototype.sewTriangle = function(triangle, bag, frontside) {
   var p2 = this.points[triangle[2]];
   var highs = [];
   var lows = [];
-  Math.abs(p0.z) < 0.0001 ? lows.push(p0) : highs.push(p0);
-  Math.abs(p1.z) < 0.0001 ? lows.push(p1) : highs.push(p1);
-  Math.abs(p2.z) < 0.0001 ? lows.push(p2) : highs.push(p2);
+  (Math.abs(p0.z) < 0.0001 ? lows : highs).push(p0);
+  (Math.abs(p1.z) < 0.0001 ? lows : highs).push(p1);
+  (Math.abs(p2.z) < 0.0001 ? lows : highs).push(p2);
 
   var points1 = [];
   var highPoint = highs[0];
@@ -440,6 +444,7 @@ Teddy.Body.prototype.buildMesh = function() {
   geometry.computeVertexNormals();
 
   this.mesh = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial({color: 0xffffff, wireframe:false}));
+  this.mesh.userData = this;
 };
 
 Teddy.Body.prototype.smoothMesh = function() {

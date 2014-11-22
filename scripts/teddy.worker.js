@@ -1,6 +1,8 @@
+'use strict';
+
 importScripts(
-  '../bower_components/three.js/three.js', 
-  '../bower_components/poly2tri/dist/poly2tri.js', 
+  '../bower_components/three.js/three.js',
+  '../bower_components/poly2tri/dist/poly2tri.js',
   'teddy.js'
 );
 self.addEventListener('message', function(event) {
