@@ -325,8 +325,8 @@ module.exports = function (grunt) {
                     cwd: '<%= config.app %>',
                     dest: '<%= config.dist %>',
                     src: [
-                        'bower_components/three.js/three.js', 
-                        'bower_components/poly2tri/dist/poly2tri.js', 
+                        'bower_components/three.js/three.js',
+                        'bower_components/poly2tri/dist/poly2tri.js',
                         'scripts/teddy.js',
                         'scripts/teddy.worker.js'
                     ]

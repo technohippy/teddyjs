@@ -1,3 +1,5 @@
+'use strict';
+
 var Teddy = Teddy || {};
 
 Teddy.UI = {};
@@ -54,13 +56,13 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   var drawing = false;
   var contours = [];
   var currentLines = [];
-  var currentMesh = undefined;
+  var currentMesh;
   var projector = new THREE.Projector();
   var rDeg = 0, gDeg = 0, bDeg = 0;
   var lineColor = new THREE.Color(Math.sin(rDeg/180*Math.PI), Math.sin(gDeg/180*Math.PI), Math.sin(bDeg/180*Math.PI));
   var lineMaterial = new THREE.LineBasicMaterial({color: lineColor});
   (function changeLineColor() {
-    requestAnimationFrame(changeLineColor);
+    window.requestAnimationFrame(changeLineColor);
     rDeg += 1;
     gDeg += 2;
     bDeg += 3;
@@ -85,7 +87,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     projector.unprojectVector(pos, camera);
     var ray = new THREE.Raycaster(camera.position, pos.sub(camera.position).normalize());
     var objs = ray.intersectObjects([paper]);
-    if (objs.length == 1) {
+    if (objs.length === 1) {
       handler(objs[0]);
     }
   }
@@ -98,10 +100,10 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
       for (var y = 0; y < textureHeight; y += step) {
         var index = (x + y * textureWidth) * 4;
         var data = imageData.data;
-        if (data[index] != 255 
-            || data[index+1] != 255 
-            || data[index+2] != 255 
-            || data[index+3] != 255) {
+        if (data[index] !== 255 ||
+            data[index+1] !== 255 ||
+            data[index+2] !== 255 ||
+            data[index+3] !== 255) {
           points.push([x, y]);
         }
       }
@@ -210,14 +212,14 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   }
 
   function cutLine(point) {
-    if (getCurrentContour().length == 0) {
+    if (getCurrentContour().length === 0) {
       firstScissorsPoint.position.copy(point).setZ(0.2);
     }
     firstScissorsPoint.rotation.x += 0.05;
     firstScissorsPoint.rotation.y += 0.025;
     firstScissorsPoint.rotation.z += 0.0125;
 
-    if (getCurrentContour().length == 0 || 0.1 < getCurrentContour()[getCurrentContour().length - 1].distanceTo(point)) {
+    if (getCurrentContour().length === 0 || 0.1 < getCurrentContour()[getCurrentContour().length - 1].distanceTo(point)) {
       // avoid collinear
       while (2 <= getCurrentContour().length) {
         var p01 = point.clone().sub(getCurrentContour()[getCurrentContour().length - 1]);
@@ -309,7 +311,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
         allMeshes.push(child);
       }
     }, this);
-    allMeshes.forEach(function(mesh) {scene.remove(mesh)});
+    allMeshes.forEach(function(mesh) {scene.remove(mesh);});
   }
 
   function clearLines() {
@@ -317,7 +319,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     scene.children.forEach(function(child) {
       if (child instanceof THREE.Line) allLines.push(child);
     }, this);
-    allLines.forEach(function(line) {scene.remove(line)});
+    allLines.forEach(function(line) {scene.remove(line);});
   }
 
   navigator.getUserMedia = (navigator.getUserMedia ||
@@ -374,7 +376,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   }
 
   var mode = 'pen';
-  var mouseLastPoint = undefined;
+  var mouseLastPoint;
 
   document.getElementById('pen-button').addEventListener('click', function(event) {
     if (paper.material.opacity === 0) clear(true);
@@ -387,7 +389,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     mode = 'scissors';
     drawing = false;
     contours.push([]);
-    currentLines.forEach(function(line) {scene.remove(line)});
+    currentLines.forEach(function(line) {scene.remove(line);});
     currentLines = [];
   });
 
@@ -408,7 +410,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   });
 
   renderer.domElement.addEventListener('mouseup', function(event) {
-    if (paper.material.opacity === 0) return
+    if (paper.material.opacity === 0) return;
     drawing = false;
     contours.push([]);
     currentLines = [];
@@ -416,7 +418,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   });
 
   renderer.domElement.addEventListener('mousedown', function(event) {
-    if (paper.material.opacity === 0) return
+    if (paper.material.opacity === 0) return;
     ifOnPaperDo(event, function(obj) {
       drawing = true;
       if (mode === 'pen') drawLine(obj.point);
@@ -424,7 +426,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   });
 
   renderer.domElement.addEventListener('mousemove', function(event) {
-    if (paper.material.opacity === 0) return
+    if (paper.material.opacity === 0) return;
     if (!drawing) return;
 
     ifOnPaperDo(event, function(obj) {
@@ -441,7 +443,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   });
 
   renderer.domElement.addEventListener('touchend', function(event) {
-    if (paper.material.opacity === 0) return
+    if (paper.material.opacity === 0) return;
     drawing = false;
     contours.push([]);
     currentLines = [];
@@ -449,7 +451,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   });
 
   renderer.domElement.addEventListener('touchstart', function(event) {
-    if (paper.material.opacity === 0) return
+    if (paper.material.opacity === 0) return;
     ifOnPaperDo(event.touches[0], function(obj) {
       drawing = true;
       if (mode === 'pen') drawLine(obj.point);
@@ -457,7 +459,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   });
 
   renderer.domElement.addEventListener('touchmove', function(event) {
-    if (paper.material.opacity === 0) return
+    if (paper.material.opacity === 0) return;
     if (!drawing) return;
 
     ifOnPaperDo(event.touches[0], function(obj) {
