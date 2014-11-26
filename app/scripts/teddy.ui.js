@@ -95,7 +95,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   function retrieveOutline() {
     var imageData = textureContext.getImageData(0, 0, textureWidth, textureHeight);
     var points = [];
-    var step = 5;
+    var step = 3;
     for (var x = 0; x < textureWidth; x += step) {
       for (var y = 0; y < textureHeight; y += step) {
         var index = (x + y * textureWidth) * 4;
@@ -108,26 +108,36 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
         }
       }
     }
+
     var outline = hull(points, 10);
-    outline.forEach(function(point) {
+
+    if (outline.length < 3) return;
+    var smoothOutline = [
+      [
+        (outline[outline.length-2][0] + outline[outline.length-1][0] + outline[0][0]) / 3,
+        (outline[outline.length-2][1] + outline[outline.length-1][1] + outline[0][1]) / 3
+      ],
+      [
+        (outline[outline.length-1][0] + outline[0][0] + outline[1][0]) / 3,
+        (outline[outline.length-1][1] + outline[0][1] + outline[1][1]) / 3
+      ]
+    ];
+    for (var i = 1; i < outline.length - 2; i++) {
+      smoothOutline.push([
+        (outline[i-1][0] + outline[i][0] + outline[i+1][0]) / 3,
+        (outline[i-1][1] + outline[i][1] + outline[i+1][1]) / 3
+      ]);
+    }
+
+    smoothOutline.forEach(function(point) {
       cutLine(new THREE.Vector3(
         point[0] / textureWidth * 8 - 4, 
         (textureHeight - point[1]) * 8 / textureHeight - 4,
         0
       ));
     }, this);
+
     make3D();
-    /*
-    var prevPoint = outline.pop();
-    textureContext.lineWidth = 1;
-    textureContext.strokeStyle = 'rgba(255,0,0,255)';
-    textureContext.moveTo(prevPoint[0], prevPoint[1]);
-    outline.forEach(function(point) {
-      textureContext.lineTo(point[0], point[1]);
-    }, this);
-    textureContext.stroke();
-    texture.needsUpdate = true;
-    */
   }
   
   function make3D() {
@@ -400,6 +410,10 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   document.getElementById('clear-button').addEventListener('click', function(event) {
     clear();
   });
+  document.querySelector('paper-icon-button[icon=refresh]').addEventListener('click', function(event) {
+    clear();
+  });
+
 
   document.getElementById('camera-button').addEventListener('click', function(event) {
     takePhoto();
