@@ -4,8 +4,16 @@
 window.getContentHeight = function() {
   return window.innerHeight - 64/* header height */;
 };
+window.getContentWidth = function() {
+  if (document.querySelector('core-drawer-panel').narrow) {
+    return window.innerWidth;
+  }
+  else {
+    return window.innerWidth - 256/* menu width */;
+  }
+};
 var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera(70, window.innerWidth / getContentHeight(), 1, 1000);
+var camera = new THREE.PerspectiveCamera(70, window.getContentWidth() / getContentHeight(), 1, 1000);
 camera.position.z = 8;
 scene.add(camera);
 var mainLight = new THREE.DirectionalLight(0xffffff);
@@ -18,9 +26,9 @@ var ambient = new THREE.AmbientLight(0x333333);
 scene.add(ambient);
 
 var renderer = new THREE.WebGLRenderer({antialias:true});
-renderer.setSize(window.innerWidth, getContentHeight());
+renderer.setSize(window.getContentWidth(), getContentHeight());
 renderer.sortObjects = false;
-document.getElementById('content').appendChild(renderer.domElement);
+document.querySelector('content').appendChild(renderer.domElement);
 
 (function render() {
   window.requestAnimationFrame(render);
@@ -30,8 +38,8 @@ document.getElementById('content').appendChild(renderer.domElement);
 Teddy.UI.setup(scene, renderer, camera);
 
 window.addEventListener('resize', function() {
-  renderer.setSize(window.innerWidth, getContentHeight());
-  camera.aspect = window.innerWidth / getContentHeight();
+  renderer.setSize(window.getContentWidth(), getContentHeight());
+  camera.aspect = window.getContentWidth() / getContentHeight();
   camera.updateProjectionMatrix();
 }, false);
 
@@ -43,6 +51,14 @@ document.addEventListener('keyup', function(event) {
       }, this);
     }
   }
+});
+
+document.addEventListener('polymer-ready', function() {
+  var navicon = document.getElementById('navicon');
+  var drawerPanel = document.querySelector('core-drawer-panel');
+  navicon.addEventListener('click', function() {
+    drawerPanel.togglePanel();
+  });
 });
 
 })();

@@ -81,7 +81,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     var rect = event.target.getBoundingClientRect();
     var mouseX = event.clientX - rect.left;
     var mouseY = event.clientY - rect.top;
-    mouseX =  (mouseX/window.innerWidth)  * 2 - 1;
+    mouseX =  (mouseX/getContentWidth())  * 2 - 1;
     mouseY = -(mouseY/getContentHeight()) * 2 + 1;
     var pos = new THREE.Vector3(mouseX, mouseY, 1);
     projector.unprojectVector(pos, camera);
@@ -419,7 +419,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     clear();
   });
 
-  document.querySelector('paper-icon-button[icon="image:camera-alt"]').addEventListener('click', function(event) {
+  document.querySelector('core-item[icon="image:camera-alt"]').addEventListener('click', function(event) {
     takePhoto();
   });
 
