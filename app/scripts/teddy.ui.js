@@ -82,7 +82,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     var mouseX = event.clientX - rect.left;
     var mouseY = event.clientY - rect.top;
     mouseX =  (mouseX/window.innerWidth)  * 2 - 1;
-    mouseY = -(mouseY/window.innerHeight) * 2 + 1;
+    mouseY = -(mouseY/getContentHeight()) * 2 + 1;
     var pos = new THREE.Vector3(mouseX, mouseY, 1);
     projector.unprojectVector(pos, camera);
     var ray = new THREE.Raycaster(camera.position, pos.sub(camera.position).normalize());
@@ -136,8 +136,6 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
         0
       ));
     }, this);
-
-    make3D();
   }
   
   function make3D() {
@@ -388,14 +386,14 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   var mode = 'pen';
   var mouseLastPoint;
 
-  document.getElementById('pen-button').addEventListener('click', function(event) {
+  document.querySelector('paper-icon-button[icon=create]').addEventListener('click', function(event) {
     if (paper.material.opacity === 0) clear(true);
     mode = 'pen';
     drawing = false;
     mouseLastPoint = undefined;
   });
 
-  document.getElementById('scissors-button').addEventListener('click', function(event) {
+  document.querySelector('paper-icon-button[icon=content-cut]').addEventListener('click', function(event) {
     mode = 'scissors';
     drawing = false;
     contours.push([]);
@@ -403,24 +401,26 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     currentLines = [];
   });
 
-  document.getElementById('teddy-button').addEventListener('click', function(event) {
+  document.querySelector('paper-fab[icon=rotation-3d]').addEventListener('click', function(event) {
+    var hasOutline = false;
+    scene.children.forEach(function(child) {
+      if (child instanceof THREE.Line 
+        || (child instanceof THREE.Mesh 
+          && !(child.geometry instanceof THREE.PlaneGeometry))) {
+        hasOutline = true;
+        return;
+      }
+    });
+    if (!hasOutline) retrieveOutline();
     make3D();
   });
 
-  document.getElementById('clear-button').addEventListener('click', function(event) {
-    clear();
-  });
   document.querySelector('paper-icon-button[icon=refresh]').addEventListener('click', function(event) {
     clear();
   });
 
-
-  document.getElementById('camera-button').addEventListener('click', function(event) {
+  document.querySelector('paper-icon-button[icon="image:camera-alt"]').addEventListener('click', function(event) {
     takePhoto();
-  });
-
-  document.getElementById('hull-button').addEventListener('click', function(event) {
-    retrieveOutline();
   });
 
   renderer.domElement.addEventListener('mouseup', function(event) {
