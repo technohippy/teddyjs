@@ -442,8 +442,10 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   });
 
   document.getElementById('mesh').addEventListener('click', function(event) {
-    Teddy.Body.instances.forEach(function(body) {
-      body.material.wireframe = !body.material.wireframe;
+    scene.children.forEach(function(body) {
+      if (body instanceof THREE.Mesh && !(body.geometry instanceof THREE.PlaneGeometry)) {
+        body.material.wireframe = !body.material.wireframe;
+      }
     }, this);
   });
 
