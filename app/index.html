@@ -49,12 +49,13 @@
 
     <core-drawer-panel>
 
-      <core-header-panel drawer>
+      <core-header-panel drawer style="background: #caeaff;">
         <core-toolbar>
           <span>Menu</span>
         </core-toolbar>
         <core-menu>
-          <core-item icon="image:camera-alt" label="Camera"></core-item>
+          <core-item id="camera" icon="image:camera-alt" label="Camera"></core-item>
+          <core-item id="mesh" icon="image:grid-on" label="Mesh"></core-item>
         </core-menu>
       </core-header-panel>
 
@@ -62,16 +63,16 @@
         <core-toolbar style="background: #4285f4;">
           <paper-icon-button id="navicon" icon="menu"></paper-icon-button>
           <span flex>TEDDY.JS</span>
-          <paper-icon-button icon="create"></paper-icon-button>
-          <paper-icon-button icon="content-cut"></paper-icon-button>
-          <paper-icon-button icon="refresh"></paper-icon-button>
+          <paper-icon-button id="pen" icon="create"></paper-icon-button>
+          <paper-icon-button id="scissors" icon="content-cut"></paper-icon-button>
+          <paper-icon-button id="clear" icon="refresh"></paper-icon-button>
         </core-toolbar>
         <content></content>
       </core-header-panel>
 
     </core-drawer-panel>
 
-    <paper-fab mini icon="rotation-3d"></paper-icon-button>
+    <paper-fab mini id="3d" icon="rotation-3d"></paper-icon-button>
 
     <!-- build:js scripts/vendor.js -->
     <!-- bower:js -->

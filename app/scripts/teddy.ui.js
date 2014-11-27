@@ -137,14 +137,18 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
       ));
     }, this);
   }
-  
-  function make3D() {
+
+  function resetScissors() {
     firstScissorsPoint.position.set(-1000, -1000, -1000);
     firstScissorsPoint.rotation.x = 0;
     firstScissorsPoint.rotation.y = 0;
     firstScissorsPoint.rotation.z = 0;
     drawing = false;
     paper.material.opacity = 0;
+  }
+  
+  function make3D() {
+    resetScissors();
 
     var countContours = contours.length;
     var processedContours = 0;
@@ -386,14 +390,14 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   var mode = 'pen';
   var mouseLastPoint;
 
-  document.querySelector('paper-icon-button[icon=create]').addEventListener('click', function(event) {
-    if (paper.material.opacity === 0) clear(true);
+  document.getElementById('pen').addEventListener('click', function(event) {
+    //if (paper.material.opacity === 0) clear(true);
     mode = 'pen';
     drawing = false;
     mouseLastPoint = undefined;
   });
 
-  document.querySelector('paper-icon-button[icon=content-cut]').addEventListener('click', function(event) {
+  document.getElementById('scissors').addEventListener('click', function(event) {
     mode = 'scissors';
     drawing = false;
     contours.push([]);
@@ -401,26 +405,46 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     currentLines = [];
   });
 
-  document.querySelector('paper-fab[icon=rotation-3d]').addEventListener('click', function(event) {
-    var hasOutline = false;
-    scene.children.forEach(function(child) {
-      if (child instanceof THREE.Line 
-        || (child instanceof THREE.Mesh 
-          && !(child.geometry instanceof THREE.PlaneGeometry))) {
-        hasOutline = true;
-        return;
+  document.getElementById('3d').addEventListener('click', function(event) {
+    if (paper.material.opacity === 0) {
+      clear(true);
+      mode = 'pen';
+      drawing = false;
+      mouseLastPoint = undefined;
+    }
+    else {
+      var hasOutline = false;
+      scene.children.forEach(function(child) {
+        if (child instanceof THREE.Line 
+          || (child instanceof THREE.Mesh 
+            && !(child.geometry instanceof THREE.PlaneGeometry))) {
+          hasOutline = true;
+          return;
+        }
+      });
+      if (!hasOutline) retrieveOutline();
+      if (contours.length !== 0 && contours[contours.length - 1] !== 0) {
+        make3D();
       }
-    });
-    if (!hasOutline) retrieveOutline();
-    make3D();
+      else {
+        resetScissors();
+        controls.enabled = true;
+      }
+    }
   });
 
-  document.querySelector('paper-icon-button[icon=refresh]').addEventListener('click', function(event) {
+  document.getElementById('clear').addEventListener('click', function(event) {
     clear();
   });
 
-  document.querySelector('core-item[icon="image:camera-alt"]').addEventListener('click', function(event) {
+  document.getElementById('camera').addEventListener('click', function(event) {
     takePhoto();
+  });
+
+  document.getElementById('mesh').addEventListener('click', function(event) {
+    Teddy.Body.instances.forEach(function(body) {
+      body.material.wireframe = !body.material.wireframe;
+    }, this);
   });
 
   renderer.domElement.addEventListener('mouseup', function(event) {

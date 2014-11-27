@@ -27,6 +27,7 @@ function main() {
 
   var renderer = new THREE.WebGLRenderer({antialias:true});
   renderer.setSize(window.getContentWidth(), getContentHeight());
+  renderer.setClearColor(0x333366);
   renderer.sortObjects = false;
   document.querySelector('content').appendChild(renderer.domElement);
 
