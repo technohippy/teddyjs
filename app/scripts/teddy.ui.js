@@ -27,7 +27,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   nowMakingDialog.classList.add('now-making');
   nowMakingDialog.textContent = 'Now Building...';
   nowMakingDialog.style.display = 'none';
-  nowMakingDialog.addEventListener('click', function(event) {
+  nowMakingDialog.addEventListener('click', function() {
     nowMakingDialog.style.display = 'none';
   });
   document.body.appendChild(nowMakingDialog);
@@ -81,8 +81,8 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     var rect = event.target.getBoundingClientRect();
     var mouseX = event.clientX - rect.left;
     var mouseY = event.clientY - rect.top;
-    mouseX =  (mouseX/getContentWidth())  * 2 - 1;
-    mouseY = -(mouseY/getContentHeight()) * 2 + 1;
+    mouseX =  (mouseX/window.getContentWidth())  * 2 - 1;
+    mouseY = -(mouseY/window.getContentHeight()) * 2 + 1;
     var pos = new THREE.Vector3(mouseX, mouseY, 1);
     projector.unprojectVector(pos, camera);
     var ray = new THREE.Raycaster(camera.position, pos.sub(camera.position).normalize());
@@ -131,7 +131,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
 
     smoothOutline.forEach(function(point) {
       cutLine(new THREE.Vector3(
-        point[0] / textureWidth * 8 - 4, 
+        point[0] / textureWidth * 8 - 4,
         (textureHeight - point[1]) * 8 / textureHeight - 4,
         0
       ));
@@ -171,7 +171,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
       }
 
       var teddy = new Teddy.Body(currentContour);
-      teddy.getMeshAsync(function(_) {
+      teddy.getMeshAsync(function() {
         currentMesh = teddy.mesh;
         var geometry = currentMesh.geometry;
         geometry.faces.forEach(function(face) {
@@ -190,7 +190,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
       }, function(e) {
         contours[contours.length - 1] = [];
         console.log(e);
-        alert('Fail to create a 3D mesh');
+        window.alert('Fail to create a 3D mesh');
       }, checkMaking);
     }, this);
   }
@@ -284,13 +284,13 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     if (p20.x < p10.x && p21.x < p10.x && p20.x < p11.x && p21.x < p11.x) return false;
     if (p10.y < p20.y && p10.y < p21.y && p11.y < p20.y && p11.y < p21.y) return false;
     if (p20.y < p10.y && p21.y < p10.y && p20.y < p11.y && p21.y < p11.y) return false;
-    var v11_10 = p10.clone().sub(p11);
-    var v11_20 = p20.clone().sub(p11);
-    var v11_21 = p21.clone().sub(p11);
-    var v21_20 = p20.clone().sub(p21);
-    var v21_10 = p10.clone().sub(p21);
-    var v21_11 = p11.clone().sub(p21);
-    if (v11_10.cross(v11_20).z * v11_10.cross(v11_21).z <= 0 && v21_20.cross(v21_10).z * v21_20.cross(v21_11).z <= 0) return true;
+    var v11to10 = p10.clone().sub(p11);
+    var v11to20 = p20.clone().sub(p11);
+    var v11to21 = p21.clone().sub(p11);
+    var v21to20 = p20.clone().sub(p21);
+    var v21to10 = p10.clone().sub(p21);
+    var v21to11 = p11.clone().sub(p21);
+    if (v11to10.cross(v11to20).z * v11to10.cross(v11to21).z <= 0 && v21to20.cross(v21to10).z * v21to20.cross(v21to11).z <= 0) return true;
     return false;
   }
 
@@ -390,14 +390,14 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   var mode = 'pen';
   var mouseLastPoint;
 
-  document.getElementById('pen').addEventListener('click', function(event) {
+  document.getElementById('pen').addEventListener('click', function() {
     //if (paper.material.opacity === 0) clear(true);
     mode = 'pen';
     drawing = false;
     mouseLastPoint = undefined;
   });
 
-  document.getElementById('scissors').addEventListener('click', function(event) {
+  document.getElementById('scissors').addEventListener('click', function() {
     mode = 'scissors';
     drawing = false;
     contours.push([]);
@@ -405,7 +405,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     currentLines = [];
   });
 
-  document.getElementById('3d').addEventListener('click', function(event) {
+  document.getElementById('3d').addEventListener('click', function() {
     if (paper.material.opacity === 0) {
       clear(true);
       mode = 'pen';
@@ -415,9 +415,9 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     else {
       var hasOutline = false;
       scene.children.forEach(function(child) {
-        if (child instanceof THREE.Line 
-          || (child instanceof THREE.Mesh 
-            && !(child.geometry instanceof THREE.PlaneGeometry))) {
+        if (child instanceof THREE.Line ||
+          (child instanceof THREE.Mesh &&
+           !(child.geometry instanceof THREE.PlaneGeometry))) {
           hasOutline = true;
           return;
         }
@@ -433,15 +433,15 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     }
   });
 
-  document.getElementById('clear').addEventListener('click', function(event) {
+  document.getElementById('clear').addEventListener('click', function() {
     clear();
   });
 
-  document.getElementById('camera').addEventListener('click', function(event) {
+  document.getElementById('camera').addEventListener('click', function() {
     takePhoto();
   });
 
-  document.getElementById('mesh').addEventListener('click', function(event) {
+  document.getElementById('mesh').addEventListener('click', function() {
     scene.children.forEach(function(body) {
       if (body instanceof THREE.Mesh && !(body.geometry instanceof THREE.PlaneGeometry)) {
         body.material.wireframe = !body.material.wireframe;
@@ -449,7 +449,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     }, this);
   });
 
-  renderer.domElement.addEventListener('mouseup', function(event) {
+  renderer.domElement.addEventListener('mouseup', function() {
     if (paper.material.opacity === 0) return;
     drawing = false;
     contours.push([]);
@@ -482,7 +482,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     });
   });
 
-  renderer.domElement.addEventListener('touchend', function(event) {
+  renderer.domElement.addEventListener('touchend', function() {
     if (paper.material.opacity === 0) return;
     drawing = false;
     contours.push([]);

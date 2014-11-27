@@ -18,5 +18,5 @@
     "trailing": true,
     "smarttabs": true,
     "jquery": true,
-    "predef": ["THREE", "poly2tri", "self", "importScripts", "Teddy"]
+    "predef": ["THREE", "poly2tri", "self", "importScripts", "Teddy", "hull"]
 }
