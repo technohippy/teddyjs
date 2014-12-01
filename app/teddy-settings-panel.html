@@ -24,7 +24,7 @@
       <h2>Brush</h2>
       <div center horizontal layout>
         <div flex>Width</div>
-        <paper-slider id="line-width" style="width:70%;" pin min="20" max="80" step="10" value="40"></paper-slider>
+        <paper-slider id="line-width" style="width:70%;" pin min="30" max="100" step="10" value="50"></paper-slider>
       </div>
 
       <div center horizontal layout>
@@ -100,14 +100,14 @@
 
   <script>
   Polymer({
-    selectedColor: 'rgb(0,0,255)',
+    selectedColor: '#0000FF',
     colors: [
-      {'label':'Blue', 'rgb':'rgb(0,0,255)'},
-      {'label':'Red', 'rgb':'rgb(255,0,0)'},
-      {'label':'Green', 'rgb':'rgb(0,255,0)'},
-      {'label':'Yellow', 'rgb':'rgb(255,255,0)'},
-      {'label':'Black', 'rgb':'rgb(0,0,0)'},
-      {'label':'Erase', 'rgb':'rgb(255,255,255)'}
+      {'rgb':'#0000FF', 'label':'Blue'},
+      {'rgb':'#FF0000', 'label':'Red'},
+      {'rgb':'#00FF00', 'label':'Green'},
+      {'rgb':'#FFFF00', 'label':'Yellow'},
+      {'rgb':'#000000', 'label':'Black'},
+      {'rgb':'#FFFFFF', 'label':'Erase'}
     ]
   });
   </script>

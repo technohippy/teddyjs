@@ -318,7 +318,8 @@ module.exports = function (grunt) {
                         'bower_components/webcomponentsjs/*.*',
                         'bower_components/polymer/*.*',
                         'bower_components/core-*/*.*',
-                        'bower_components/paper-*/*.*'
+                        'bower_components/paper-*/*.*',
+                        'bower_components/web-animations-next/{,*/}*.*'
                     ]
                 }]
             },
