@@ -1,0 +1,62 @@
+<polymer-element name=teddy-settings-panel><template><style>section {
+      padding:4px 16px;
+    }
+    /*
+    h2 {
+      font-size:14px;
+    }
+    h2::before {
+      content: '\000BB';
+    }
+    */
+    paper-item {
+      overflow:hidden;
+      white-space:nowrap;
+      text-overflow:ellipsis;
+      width:130px;
+    }</style><section><h2>Brush</h2><div center="" horizontal="" layout=""><div flex="">Width</div><paper-slider id=line-width style=width:70% pin="" min=30 max=100 step=10 value=50></paper-slider></div><div center="" horizontal="" layout=""><div flex="">Color</div><paper-dropdown-menu label="Pen color"><paper-dropdown class=dropdown style=color:#1A237E><core-menu id=line-color class=menu valueattr=id selected><template repeat="{{color in colors}}"><paper-item id={{color.rgb}}>{{color.label}}</paper-item></template></core-menu></paper-dropdown></paper-dropdown-menu></div></section><section><h2>Texture</h2><!--
+      <div center horizontal layout>
+        <div flex>File</div>
+        <paper-icon-button id="file" icon="file-upload" flex></paper-icon-button>
+      </div>
+      --><div center="" horizontal="" layout=""><div flex="">Camera</div><paper-icon-button id=camera icon=image:camera-alt flex=""></paper-icon-button></div></section><section><h2>View</h2><div center="" horizontal="" layout=""><div flex="">Wireframe</div><paper-toggle-button id=mesh flex=""></paper-toggle-button></div><!--
+      <div center horizontal layout>
+        <div flex>Bumpmap</div>
+        <paper-toggle-button id="bumpmap"></paper-toggle-button>
+      </div>
+
+      <div center horizontal layout>
+        <div flex>Toonshader</div>
+        <paper-toggle-button id="toon"></paper-toggle-button>
+      </div>
+      --></section><!--
+    <section>
+      <h2>Data</h2>
+      <div center horizontal layout>
+        <div flex>Load</div>
+        <paper-icon-button id="load" icon="file-download" flex></paper-icon-button>
+      </div>
+      <div center horizontal layout>
+        <div flex>Save</div>
+        <paper-icon-button id="save" icon="file-upload" flex></paper-icon-button>
+      </div>
+      <div center horizontal layout>
+        <div flex>Share</div>
+        <paper-icon-button id="share" icon="social:share" flex></paper-icon-button>
+      </div>
+    </section>
+
+    <section>
+      <h2>Bodies</h2>
+    </section>
+    --></template><script>Polymer({
+    selectedColor: '#0000FF',
+    colors: [
+      {'rgb':'#0000FF', 'label':'Blue'},
+      {'rgb':'#FF0000', 'label':'Red'},
+      {'rgb':'#00FF00', 'label':'Green'},
+      {'rgb':'#FFFF00', 'label':'Yellow'},
+      {'rgb':'#000000', 'label':'Black'},
+      {'rgb':'#FFFFFF', 'label':'Erase'}
+    ]
+  });</script></polymer-element>

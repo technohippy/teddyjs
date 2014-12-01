@@ -173,39 +173,40 @@ Teddy.Body.prototype.prunSpines = function() {
     var currentSpine = tSpine;
     var currentJoint = currentSpine.joint1.isTerminal() ? currentSpine.joint1 : currentSpine.joint2;
     var checkPointIds = [];
+    var linkPointIdsMapper = function(id) {return this.points[id];}.bind(this);
+    var pointIdIter = function(pointId) {checkPointIds.push(pointId);};
+    var checkPointIdSorter = function(a, b) {return a === b ? 0 : a < b ? -1 : 1;};
+    var checkPointId;
+    var ii;
     do {
       prunedSpines.push(currentSpine);
       currentJoint = currentSpine.getNextJoint(currentJoint);
 
       var linkPointIds = currentSpine.getEdgeIdsIncluding(currentJoint.getPoint());
-      var linkPoints = linkPointIds.map(function(id) {return this.points[id];}.bind(this));
+      var linkPoints = linkPointIds.map(linkPointIdsMapper);
       var center = currentJoint.getPoint();
       var distance = center.distanceTo(linkPoints[0]);
-      currentSpine.getAllPointIdsWithoutIds(linkPointIds).forEach(function(pointId) {
-        checkPointIds.push(pointId);
-      });
+      currentSpine.getAllPointIdsWithoutIds(linkPointIds).forEach(pointIdIter, this);
       for (var i = 0; i < checkPointIds.length; i++) {
         var point = this.points[checkPointIds[i]];
         if (distance < center.distanceTo(point)) {
           checkPointIds.push(linkPointIds[0]);
           checkPointIds.push(linkPointIds[1]);
-          checkPointIds = checkPointIds.sort(function(a, b) {
-            return a === b ? 0 : a < b ? -1 : 1;
-          });
-          var cursor = checkPointIds.shift();
-          for (var i = 0; i < checkPointIds.length + 1; i++) {
-            checkPointIds.push(cursor);
-            if (checkPointIds[0] === cursor + 1) {
-              cursor = checkPointIds.shift();
+          checkPointIds = checkPointIds.sort(checkPointIdSorter);
+          checkPointId = checkPointIds.shift();
+          for (ii = 0; ii < checkPointIds.length + 1; ii++) {
+            checkPointIds.push(checkPointId);
+            if (checkPointIds[0] === checkPointId + 1) {
+              checkPointId = checkPointIds.shift();
             }
             else {
               break;
             }
           }
-          for (var i = 1; i < checkPointIds.length; i++) {
+          for (ii = 1; ii < checkPointIds.length; ii++) {
             currentJoint.addTriangle(
-              checkPointIds[i-1],
-              checkPointIds[i],
+              checkPointIds[ii-1],
+              checkPointIds[ii],
               this.getPointIndex(center)
             );
           }
@@ -218,26 +219,24 @@ Teddy.Body.prototype.prunSpines = function() {
       if (currentSpine.isJunction()) {
         // TODO: need refactoring
         prunedSpines.push(currentSpine);
-        linkPointIds.forEach(function(id) { checkPointIds.push(id); });
+        linkPointIds.forEach(pointIdIter);
         currentJoint = currentSpine.getNextJoint(currentJoint);
-        var center = currentJoint.getPoint();
-        checkPointIds = checkPointIds.sort(function(a, b) {
-          return a === b ? 0 : a < b ? -1 : 1;
-        });
-        var cursor = checkPointIds.shift();
-        for (var i = 0; i < checkPointIds.length + 1; i++) {
-          checkPointIds.push(cursor);
-          if (checkPointIds[0] === cursor + 1) {
-            cursor = checkPointIds.shift();
+        center = currentJoint.getPoint();
+        checkPointIds = checkPointIds.sort(checkPointIdSorter);
+        checkPointId = checkPointIds.shift();
+        for (ii = 0; ii < checkPointIds.length + 1; ii++) {
+          checkPointIds.push(checkPointId);
+          if (checkPointIds[0] === checkPointId + 1) {
+            checkPointId = checkPointIds.shift();
           }
           else {
             break;
           }
         }
-        for (var i = 1; i < checkPointIds.length; i++) {
+        for (ii = 1; ii < checkPointIds.length; ii++) {
           currentJoint.addTriangle(
-            checkPointIds[i-1],
-            checkPointIds[i],
+            checkPointIds[ii-1],
+            checkPointIds[ii],
             this.getPointIndex(center)
           );
         }
@@ -370,10 +369,11 @@ Teddy.Body.prototype.sewTriangle = function(triangle, bag, frontside) {
   var height = highPoint.z;
   var projectedSlope = lowPoint.clone().sub(highPoint.clone().setZ(lowPoint.z));
   var width = projectedSlope.length();
+  var rad, l, h;
   for (var deg = 0; deg <= 90; deg += 10) {
-    var rad = deg / 180 * Math.PI;
-    var l = width * Math.cos(rad);
-    var h = height * Math.sin(rad);
+    rad = deg / 180 * Math.PI;
+    l = width * Math.cos(rad);
+    h = height * Math.sin(rad);
     points1.push(new THREE.Vector3(
       highPoint.x + l/width*projectedSlope.x,
       highPoint.y + l/width*projectedSlope.y,
@@ -635,8 +635,8 @@ Teddy.Spine.prototype.isEqual = function(that) {
   var thatJ1 = typeof that.joint1 === 'undefined' ? -1 : that.joint1.pointIndex;
   var thatJ2 = typeof that.joint2 === 'undefined' ? -1 : that.joint2.pointIndex;
 
-  return (thisJ1 === thatJ1 && thisJ2 === thatJ2)
-      || (thisJ1 === thatJ2 && thisJ2 === thatJ1);
+  return (thisJ1 === thatJ1 && thisJ2 === thatJ2) ||
+    (thisJ1 === thatJ2 && thisJ2 === thatJ1);
 };
 
 Teddy.Spine.prototype.toString = function() {
