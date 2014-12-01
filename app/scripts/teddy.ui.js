@@ -493,6 +493,8 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     if (paper.material.opacity === 0) return;
     ifOnPaperDo(event.touches[0], function(obj) {
       drawing = true;
+      strokeConfig['lineWidth'] = document.querySelector('html /deep/ #line-width').value;
+      strokeConfig['lineColor'] = document.querySelector('html /deep/ #line-color').selected;
       if (mode === 'pen') drawLine(obj.point);
     });
   });
