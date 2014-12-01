@@ -1,28 +1,5 @@
-button {
-  height:40px;
-  font-weight:bold;
-  border-radius:20px;
-  border:1px solid white;
-  background-color:white;
-  padding-left:10px;
-  padding-right:10px;
-  margin:5px;
-}
 canvas {
   overflow:hidden;
-}
-.now-making {
-  color:white;
-  font-size:3em;
-  left:0;
-  height:100%;
-  text-align:center;
-  text-shadow: 0 0 10px black;
-  top:0;
-  padding-top:20%;
-  position:absolute;
-  width:100%;
-  z-index:10;
 }
 
 core-header-panel {
@@ -37,7 +14,45 @@ paper-fab {
   position:absolute;
   bottom:20px;
   right:20px;
+  background: #F44336;
 }
 core-drawer-panel:not([narrow]) #navicon {
   display: none;
+}
+core-drawer-panel:not([narrow]) [main] core-toolbar span {
+  color:transparent;
+}
+[narrow] [drawer]::shadow #dropShadow  {
+  display: none;
+}
+[narrow] [drawer] core-toolbar {
+  display: none;
+}
+paper-spinner {
+  height:20vmin;
+  width:20vmin;
+  position:absolute;
+  margin-top:25%;
+  margin-left:40%;
+  padding-top:-10vmin;
+  padding-left:-10vmin;
+}
+div[layout] {
+  margin:16px;
+}
+html /deep/ paper-dropdown-menu {
+  box-sizing:border-box;
+  width:130px;
+}
+html /deep/ paper-dropdown {
+  position:absolute;
+}
+.dropdown {
+  position:absolute;
+  height:360px;
+  width:150px;
+}
+html /deep/ core-menu {
+  box-sizing:border-box;
+  width:150px;
 }

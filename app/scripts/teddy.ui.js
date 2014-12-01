@@ -23,14 +23,6 @@ Teddy.UI.addTextureCanvas = function(textureWidth, textureHeight) {
 Teddy.UI.setup = function(scene, renderer, camera, paper) {
   var controls = new THREE.OrbitControls(camera);
   controls.enabled = false;
-  var nowMakingDialog = document.createElement('div');
-  nowMakingDialog.classList.add('now-making');
-  nowMakingDialog.textContent = 'Now Building...';
-  nowMakingDialog.style.display = 'none';
-  nowMakingDialog.addEventListener('click', function() {
-    nowMakingDialog.style.display = 'none';
-  });
-  document.body.appendChild(nowMakingDialog);
   var textureWidth = 600;
   var textureHeight = 600;
   var canvas = Teddy.UI.addTextureCanvas(textureWidth, textureHeight);
@@ -152,13 +144,16 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
 
     var countContours = contours.length;
     var processedContours = 0;
-    nowMakingDialog.style.display = 'block';
+    var spinner = document.getElementById('now-building');
+    spinner.active = true;
+    spinner.style.display = 'block';
     function checkMaking() {
       processedContours++;
       if (countContours === processedContours) {
         clearLines();
         currentLines = [];
-        nowMakingDialog.style.display = 'none';
+        spinner.active = false;
+        spinner.style.display = 'none';
         contours = [];
         controls.enabled = true;
       }
@@ -196,8 +191,8 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   }
 
   function drawLine(point) {
-    var lineWidth = 50;
-    var lineColor = 'rgb(0,0,255)';
+    var lineWidth = strokeConfig['lineWidth'];
+    var lineColor = strokeConfig['lineColor'];
     var x = (point.x + 4) / 8 * textureWidth;
     var y = textureHeight - (point.y + 4) / 8 * textureHeight;
     if (typeof mouseLastPoint === 'undefined') {
@@ -389,6 +384,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
 
   var mode = 'pen';
   var mouseLastPoint;
+  var strokeConfig = {};
 
   document.getElementById('pen').addEventListener('click', function() {
     //if (paper.material.opacity === 0) clear(true);
@@ -434,14 +430,15 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   });
 
   document.getElementById('clear').addEventListener('click', function() {
+    console.log(document.querySelector('html /deep/ #mesh').checked);
     clear();
   });
 
-  document.getElementById('camera').addEventListener('click', function() {
+  document.querySelector('html /deep/ #camera').addEventListener('click', function() {
     takePhoto();
   });
 
-  document.getElementById('mesh').addEventListener('click', function() {
+  document.querySelector('html /deep/ #mesh').addEventListener('click', function() {
     scene.children.forEach(function(body) {
       if (body instanceof THREE.Mesh && !(body.geometry instanceof THREE.PlaneGeometry)) {
         body.material.wireframe = !body.material.wireframe;
@@ -461,6 +458,8 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     if (paper.material.opacity === 0) return;
     ifOnPaperDo(event, function(obj) {
       drawing = true;
+      strokeConfig['lineWidth'] = document.querySelector('html /deep/ #line-width').value;
+      strokeConfig['lineColor'] = document.querySelector('html /deep/ #line-color').selected;
       if (mode === 'pen') drawLine(obj.point);
     });
   });

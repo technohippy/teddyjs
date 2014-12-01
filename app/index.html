@@ -27,20 +27,28 @@
     <link rel="import" href="bower_components/core-drawer-panel/core-drawer-panel.html">
     <link rel="import" href="bower_components/core-menu/core-menu.html">
     <link rel="import" href="bower_components/core-item/core-item.html">
+    <link rel="import" href="bower_components/core-icon/core-icon.html">
     <link rel="import" href="bower_components/core-icons/core-icons.html">
     <link rel="import" href="bower_components/core-icons/image-icons.html">
+    <link rel="import" href="bower_components/core-icons/social-icons.html">
     <link rel="import" href="bower_components/paper-fab/paper-fab.html">
     <link rel="import" href="bower_components/paper-icon-button/paper-icon-button.html">
+    <link rel="import" href="bower_components/paper-spinner/paper-spinner.html">
+    <link rel="import" href="bower_components/paper-button/paper-button.html">
+    <link rel="import" href="bower_components/paper-toggle-button/paper-toggle-button.html">
+    <link rel="import" href="bower_components/paper-slider/paper-slider.html">
+    <link rel="import" href="bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+    <link rel="import" href="bower_components/paper-dropdown/paper-dropdown.html">
+    <link rel="import" href="bower_components/paper-radio-group/paper-radio-group.html">
+    <link rel="import" href="bower_components/paper-item/paper-item.html">
     <!--
     <link rel="import" href="bower_components/paper-tabs/paper-tabs.html">
     <link rel="import" href="bower_components/paper-checkbox/paper-checkbox.html">
-    <link rel="import" href="bower_components/paper-toggle-button/paper-toggle-button.html">
-    <link rel="import" href="bower_components/paper-radio-group/paper-radio-group.html">
-    <link rel="import" href="bower_components/paper-fab/paper-fab.html">
-    <link rel="import" href="bower_components/paper-slider/paper-slider.html">
     <link rel="import" href="bower_components/paper-progress/paper-progress.html">
     <link rel="import" href="bower_components/paper-input/paper-input.html">
     -->
+
+    <link rel="import" href="teddy-settings-panel.html">
   </head>
   <body fullbleed unresolved>
     <!--[if lt IE 10]>
@@ -49,29 +57,32 @@
 
     <core-drawer-panel>
 
-      <core-header-panel drawer style="background: #caeaff;">
-        <core-toolbar>
-          <span>Menu</span>
+      <core-header-panel drawer style="background: #7986CB; color:#E8EAF6;">
+        <core-toolbar style="background: #3f51b5;">
+          <span>TEDDY.JS</span>
         </core-toolbar>
-        <core-menu>
-          <core-item id="camera" icon="image:camera-alt" label="Camera"></core-item>
-          <core-item id="mesh" icon="image:grid-on" label="Mesh"></core-item>
-        </core-menu>
+
+        <teddy-settings-panel></teddy-settings-panel>
       </core-header-panel>
 
       <core-header-panel main>
-        <core-toolbar style="background: #4285f4;">
+        <core-toolbar style="background: #3f51b5;">
           <paper-icon-button id="navicon" icon="menu"></paper-icon-button>
           <span flex>TEDDY.JS</span>
           <paper-icon-button id="pen" icon="create"></paper-icon-button>
           <paper-icon-button id="scissors" icon="content-cut"></paper-icon-button>
           <paper-icon-button id="clear" icon="refresh"></paper-icon-button>
         </core-toolbar>
-        <content></content>
-        <paper-fab mini id="3d" icon="rotation-3d"></paper-icon-button>
+        <content>
+          <paper-spinner id="now-building" style="display:none;"></paper-spinner>
+        </content>
+        <paper-shadow z="5">
+          <paper-fab mini id="3d" icon="rotation-3d"></paper-fab>
+        </paper-shadow>
       </core-header-panel>
 
     </core-drawer-panel>
+
 
     <!-- build:js scripts/vendor.js -->
     <!-- bower:js -->

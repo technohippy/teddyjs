@@ -27,7 +27,10 @@ function main() {
 
   var renderer = new THREE.WebGLRenderer({antialias:true});
   renderer.setSize(window.getContentWidth(), window.getContentHeight());
-  renderer.setClearColor(0x333366);
+  //renderer.setClearColor(0x333366);
+  //renderer.setClearColor(0x3f51b5);
+  //renderer.setClearColor(0xc5cae6);
+  renderer.setClearColor(0x1A237E);
   renderer.sortObjects = false;
   document.querySelector('content').appendChild(renderer.domElement);
 
@@ -57,7 +60,8 @@ function main() {
 
 document.addEventListener('polymer-ready', function() {
   'use strict';
-  var navicon = document.getElementById('navicon');
+  var navicon = document.querySelector('#navicon');
+  //var navicon = document.getElementById('navicon');
   var drawerPanel = document.querySelector('core-drawer-panel');
   navicon.addEventListener('click', function() {
     drawerPanel.togglePanel();
