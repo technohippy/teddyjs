@@ -52,12 +52,12 @@
     }
     ::shadow #toggleBar[checked] {
       background-color: #3f51b5;
-    }</style><section><h2>Brush</h2><div center="" horizontal="" layout=""><div flex="">Width</div><paper-slider id=line-width pin="" min=30 max=100 step=10 value=50></paper-slider></div><div center="" horizontal="" layout=""><div flex="">Color</div><paper-dropdown-menu label="Pen color" style="border-botton: 1px solid white"><paper-dropdown class=dropdown style=color:#1A237E><core-menu id=line-color class=menu valueattr=id selected><template repeat="{{color in colors}}"><paper-item id={{color.rgb}}>{{color.label}}</paper-item></template></core-menu></paper-dropdown></paper-dropdown-menu></div></section><section><h2>Texture</h2><!--
+    }</style><section><h2>Brush</h2><div center="" horizontal="" layout=""><div flex="">Width</div><paper-slider id=line-width pin="" min=30 max=100 step=10 value=50 on-trackstart={{cancelBubble}} on-trackx={{cancelBubble}} on-trackend={{cancelBubble}}></paper-slider></div><div center="" horizontal="" layout=""><div flex="">Color</div><paper-dropdown-menu label="Pen color" style="border-botton: 1px solid white"><paper-dropdown class=dropdown style=color:#1A237E><core-menu id=line-color class=menu valueattr=id selected><template repeat="{{color in colors}}"><paper-item id={{color.rgb}}>{{color.label}}</paper-item></template></core-menu></paper-dropdown></paper-dropdown-menu></div></section><section><h2>Texture</h2><!--
       <div center horizontal layout>
         <div flex>File</div>
         <paper-icon-button id="file" icon="file-upload" flex></paper-icon-button>
       </div>
-      --><div center="" horizontal="" layout=""><div flex="">Camera</div><paper-icon-button id=camera icon=image:camera-alt flex=""></paper-icon-button></div></section><section><h2>View</h2><div center="" horizontal="" layout=""><div flex="">Wireframe</div><paper-toggle-button id=mesh class=blue flex=""></paper-toggle-button></div><!--
+      --><div center="" horizontal="" layout=""><div flex="">Camera</div><paper-icon-button id=camera icon=image:camera-alt flex=""></paper-icon-button></div></section><section><h2>View</h2><div center="" horizontal="" layout=""><div flex="">Wireframe</div><paper-toggle-button id=mesh class=blue flex="" on-trackstart={{cancelBubble}} on-trackx={{cancelBubble}} on-trackend={{cancelBubble}}></paper-toggle-button></div><!--
       <div center horizontal layout>
         <div flex>Bumpmap</div>
         <paper-toggle-button id="bumpmap"></paper-toggle-button>
@@ -97,5 +97,6 @@
       {'rgb':'#FF9900', 'label':'Orange'},
       {'rgb':'#000000', 'label':'Black'},
       {'rgb':'#FFFFFF', 'label':'Erase'}
-    ]
+    ],
+    cancelBubble: function(e) {e.cancelBubble = true;}
   });</script></polymer-element>
