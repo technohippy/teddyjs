@@ -12,6 +12,9 @@
       content: '\000BB';
     }
     */
+    paper-slider {
+      width:150px;
+    }
     paper-dropdown-menu {
       box-sizing:border-box;
       width:130px;
@@ -44,6 +47,12 @@
     ::shadow paper-radio-button::shadow #onRadio {
       background-color: #3f51b5;
     }
+    ::shadow paper-radio-button::shadow #offRadio {
+      border-color: #c8c8c8;
+    }
+    ::shadow #toggleBar {
+      background-color: #c8c8c8;
+    }
     ::shadow #toggleBar[checked] {
       background-color: #3f51b5;
     }
@@ -53,7 +62,7 @@
       <h2>Brush</h2>
       <div center horizontal layout>
         <div flex>Width</div>
-        <paper-slider id="line-width" style="width:70%;" pin min="30" max="100" step="10" value="50"></paper-slider>
+        <paper-slider id="line-width" pin min="30" max="100" step="10" value="50"></paper-slider>
       </div>
 
       <div center horizontal layout>

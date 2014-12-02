@@ -501,6 +501,8 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   });
 
   renderer.domElement.addEventListener('touchmove', function(event) {
+    event.preventDefault();
+
     if (paper.material.opacity === 0) return;
     if (!drawing) return;
 
