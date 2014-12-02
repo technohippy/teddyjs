@@ -58,10 +58,9 @@ function main() {
   });
 }
 
-document.addEventListener('polymer-ready', function() {
+window.addEventListener('polymer-ready', function() {
   'use strict';
   var navicon = document.querySelector('#navicon');
-  //var navicon = document.getElementById('navicon');
   var drawerPanel = document.querySelector('core-drawer-panel');
   navicon.addEventListener('click', function() {
     drawerPanel.togglePanel();

@@ -165,7 +165,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
         return; // TODO: そもそも登録しないようにする
       }
 
-      var teddy = new Teddy.Body(currentContour);
+      var teddy = new Teddy.Body(currentContour, meshSwitch.checked);
       teddy.getMeshAsync(function() {
         currentMesh = teddy.mesh;
         var geometry = currentMesh.geometry;
@@ -438,10 +438,11 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     takePhoto();
   });
 
-  document.querySelector('html /deep/ #mesh').addEventListener('click', function() {
+  var meshSwitch = document.querySelector('html /deep/ #mesh');
+  meshSwitch.addEventListener('change', function() {
     scene.children.forEach(function(body) {
       if (body instanceof THREE.Mesh && !(body.geometry instanceof THREE.PlaneGeometry)) {
-        body.material.wireframe = !body.material.wireframe;
+        body.material.wireframe = meshSwitch.checked;
       }
     }, this);
   });

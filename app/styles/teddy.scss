@@ -40,19 +40,3 @@ paper-spinner {
 div[layout] {
   margin:16px;
 }
-html /deep/ paper-dropdown-menu {
-  box-sizing:border-box;
-  width:130px;
-}
-html /deep/ paper-dropdown {
-  position:absolute;
-}
-.dropdown {
-  position:absolute;
-  height:360px;
-  width:150px;
-}
-html /deep/ core-menu {
-  box-sizing:border-box;
-  width:150px;
-}
