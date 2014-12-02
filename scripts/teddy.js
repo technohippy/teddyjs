@@ -5,14 +5,14 @@ var Teddy = Teddy || {};
 
 Teddy.DIST_THRESHOLD = 0.001;
 
-Teddy.Body = function(points) {
+Teddy.Body = function(points, useWireframe) {
   this.points = points || [];
   this.outlineSize = this.points.length;
   this.joints = [];
   this.triangles = [];
   this.spines = [];
   this.mesh = undefined;
-  this.material = new THREE.MeshPhongMaterial({color:0xffffff, wireframe:false});
+  this.material = new THREE.MeshPhongMaterial({color:0xffffff, wireframe:useWireframe});
   if (Teddy.Body.insntaces === undefined) Teddy.Body.instances = [];
   Teddy.Body.instances.push(this);
 };

@@ -9,17 +9,46 @@
       content: '\000BB';
     }
     */
+    paper-dropdown-menu {
+      box-sizing:border-box;
+      width:130px;
+      border-bottom: 1px solid white;
+    }
+    paper-dropdown {
+      position:absolute;
+    }
+    .dropdown {
+      position:absolute;
+      height:360px;
+      width:130px;
+    }
+    core-menu {
+      box-sizing:border-box;
+      width:130px;
+    }
     paper-item {
       overflow:hidden;
       white-space:nowrap;
       text-overflow:ellipsis;
-      width:130px;
-    }</style><section><h2>Brush</h2><div center="" horizontal="" layout=""><div flex="">Width</div><paper-slider id=line-width style=width:70% pin="" min=30 max=100 step=10 value=50></paper-slider></div><div center="" horizontal="" layout=""><div flex="">Color</div><paper-dropdown-menu label="Pen color"><paper-dropdown class=dropdown style=color:#1A237E><core-menu id=line-color class=menu valueattr=id selected><template repeat="{{color in colors}}"><paper-item id={{color.rgb}}>{{color.label}}</paper-item></template></core-menu></paper-dropdown></paper-dropdown-menu></div></section><section><h2>Texture</h2><!--
+      width:120px;
+    }
+    ::shadow #label, ::shadow #arrow {
+      color:white;
+    }
+    ::shadow paper-radio-button::shadow #ink[checked] {
+      color: #3f51b5;
+    }
+    ::shadow paper-radio-button::shadow #onRadio {
+      background-color: #3f51b5;
+    }
+    ::shadow #toggleBar[checked] {
+      background-color: #3f51b5;
+    }</style><section><h2>Brush</h2><div center="" horizontal="" layout=""><div flex="">Width</div><paper-slider id=line-width style=width:70% pin="" min=30 max=100 step=10 value=50></paper-slider></div><div center="" horizontal="" layout=""><div flex="">Color</div><paper-dropdown-menu label="Pen color" style="border-botton: 1px solid white"><paper-dropdown class=dropdown style=color:#1A237E><core-menu id=line-color class=menu valueattr=id selected><template repeat="{{color in colors}}"><paper-item id={{color.rgb}}>{{color.label}}</paper-item></template></core-menu></paper-dropdown></paper-dropdown-menu></div></section><section><h2>Texture</h2><!--
       <div center horizontal layout>
         <div flex>File</div>
         <paper-icon-button id="file" icon="file-upload" flex></paper-icon-button>
       </div>
-      --><div center="" horizontal="" layout=""><div flex="">Camera</div><paper-icon-button id=camera icon=image:camera-alt flex=""></paper-icon-button></div></section><section><h2>View</h2><div center="" horizontal="" layout=""><div flex="">Wireframe</div><paper-toggle-button id=mesh flex=""></paper-toggle-button></div><!--
+      --><div center="" horizontal="" layout=""><div flex="">Camera</div><paper-icon-button id=camera icon=image:camera-alt flex=""></paper-icon-button></div></section><section><h2>View</h2><div center="" horizontal="" layout=""><div flex="">Wireframe</div><paper-toggle-button id=mesh class=blue flex=""></paper-toggle-button></div><!--
       <div center horizontal layout>
         <div flex>Bumpmap</div>
         <paper-toggle-button id="bumpmap"></paper-toggle-button>
@@ -52,10 +81,11 @@
     --></template><script>Polymer({
     selectedColor: '#0000FF',
     colors: [
-      {'rgb':'#0000FF', 'label':'Blue'},
       {'rgb':'#FF0000', 'label':'Red'},
       {'rgb':'#00FF00', 'label':'Green'},
+      {'rgb':'#0000FF', 'label':'Blue'},
       {'rgb':'#FFFF00', 'label':'Yellow'},
+      {'rgb':'#FF9900', 'label':'Orange'},
       {'rgb':'#000000', 'label':'Black'},
       {'rgb':'#FFFFFF', 'label':'Erase'}
     ]
