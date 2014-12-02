@@ -62,7 +62,7 @@
       <h2>Brush</h2>
       <div center horizontal layout>
         <div flex>Width</div>
-        <paper-slider id="line-width" pin min="30" max="100" step="10" value="50"></paper-slider>
+        <paper-slider id="line-width" pin min="30" max="100" step="10" value="50" on-trackstart={{cancelBubble}} on-trackx={{cancelBubble}} on-trackend={{cancelBubble}}></paper-slider>
       </div>
 
       <div center horizontal layout>
@@ -97,7 +97,7 @@
       <h2>View</h2>
       <div center horizontal layout>
         <div flex>Wireframe</div>
-        <paper-toggle-button id="mesh" class="blue" flex></paper-toggle-button>
+        <paper-toggle-button id="mesh" class="blue" flex on-trackstart={{cancelBubble}} on-trackx={{cancelBubble}} on-trackend={{cancelBubble}}></paper-toggle-button>
       </div>
 
       <!--
@@ -147,7 +147,8 @@
       {'rgb':'#FF9900', 'label':'Orange'},
       {'rgb':'#000000', 'label':'Black'},
       {'rgb':'#FFFFFF', 'label':'Erase'}
-    ]
+    ],
+    cancelBubble: function(e) {e.cancelBubble = true;}
   });
   </script>
 </polymer-element>
