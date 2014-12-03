@@ -446,8 +446,22 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     }
   });
 
-  document.getElementById('clear').addEventListener('click', function() {
+  document.querySelector('paper-action-dialog paper-button[affirmative]').addEventListener('click', function(event) {
+    event.cancelBubble = true;
     clear();
+  });
+
+  document.getElementById('clear').addEventListener('click', function() {
+    var hasObj = false;
+    scene.children.forEach(function(body) {
+      if (body instanceof THREE.Mesh && !(body.geometry instanceof THREE.PlaneGeometry)) {
+        hasObj = true;
+        return;
+      }
+    }, this);
+    if (!hasObj) return;
+    
+    document.getElementById('confirm-dialog').open();
   });
 
   document.querySelector('html /deep/ #camera').addEventListener('click', function() {
