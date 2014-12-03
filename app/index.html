@@ -75,7 +75,7 @@
           <paper-icon-button id="clear" icon="refresh"></paper-icon-button>
         </core-toolbar>
         <content>
-          <paper-spinner id="now-building" style="display:none;"></paper-spinner>
+          <paper-spinner id="now-building" style="z-index:-1;"></paper-spinner>
         </content>
         <paper-fab mini class="retire" id="3d" icon="rotation-3d"></paper-fab>
       </core-header-panel>
@@ -85,6 +85,11 @@
     <paper-action-dialog id="confirm-dialog" heading="Are you sure to restart?">
       <p>Some objects exist and will be removed.</p>
       <paper-button dismissive autofocus>Cancel</paper-button>
+      <paper-button affirmative>OK</paper-button>
+    </paper-action-dialog>
+
+    <paper-action-dialog id="alert-dialog">
+      <p>Fail to create a 3D mesh</p>
       <paper-button affirmative>OK</paper-button>
     </paper-action-dialog>
 

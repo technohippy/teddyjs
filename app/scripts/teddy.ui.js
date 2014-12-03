@@ -146,14 +146,14 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     var processedContours = 0;
     var spinner = document.getElementById('now-building');
     spinner.active = true;
-    spinner.style.display = 'block';
+    spinner.style.zIndex = 1;
     function checkMaking() {
       processedContours++;
       if (countContours === processedContours) {
         clearLines();
         currentLines = [];
         spinner.active = false;
-        spinner.style.display = 'none';
+        spinner.style.zIndex = -1;
         contours = [];
         controls.enabled = true;
       }
@@ -185,7 +185,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
       }, function(e) {
         contours[contours.length - 1] = [];
         console.log(e);
-        window.alert('Fail to create a 3D mesh');
+        document.getElementById('alert-dialog').open();
       }, checkMaking);
     }, this);
   }
@@ -446,7 +446,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     }
   });
 
-  document.querySelector('paper-action-dialog paper-button[affirmative]').addEventListener('click', function(event) {
+  document.querySelector('#confirm-dialog paper-button[affirmative]').addEventListener('click', function(event) {
     event.cancelBubble = true;
     clear();
   });
