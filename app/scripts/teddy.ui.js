@@ -292,7 +292,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   }
 
   function clear(reserveMesh) {
-    mode = 'pen';
+    setMode('pen');
     mouseLastPoint = undefined;
     firstScissorsPoint.position.set(-1000, -1000, -1000);
     drawing = false;
@@ -392,19 +392,26 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     texture.needsUpdate = true;
   }
 
-  var mode = 'pen';
+  var mode;
+  function setMode(val) {
+    mode = val;
+    document.querySelector('#pen').setAttribute('selected', val === 'pen');
+    document.querySelector('#scissors').setAttribute('selected', val === 'scissors');
+  }
+  setMode('pen');
+
   var mouseLastPoint;
   var strokeConfig = {};
 
   document.getElementById('pen').addEventListener('click', function() {
     //if (paper.material.opacity === 0) clear(true);
-    mode = 'pen';
+    setMode('pen');
     drawing = false;
     mouseLastPoint = undefined;
   });
 
   document.getElementById('scissors').addEventListener('click', function() {
-    mode = 'scissors';
+    setMode('scissors');
     drawing = false;
     contours.push([]);
     currentLines.forEach(function(line) {scene.remove(line);});
@@ -414,7 +421,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   document.getElementById('3d').addEventListener('click', function() {
     if (paper.material.opacity === 0) {
       clear(true);
-      mode = 'pen';
+      setMode('pen');
       drawing = false;
       mouseLastPoint = undefined;
     }
@@ -510,6 +517,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
       drawing = true;
       strokeConfig['lineWidth'] = document.querySelector('html /deep/ #line-width').value;
       strokeConfig['lineColor'] = document.querySelector('html /deep/ #line-color').selected;
+      if (strokeConfig['lineColor'] === '') strokeConfig['lineColor'] = 'rgb(0,0,255)';
       if (mode === 'pen') drawLine(obj.point);
     });
   });

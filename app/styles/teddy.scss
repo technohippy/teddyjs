@@ -44,3 +44,14 @@ paper-spinner {
 div[layout] {
   margin:16px;
 }
+core-toolbar paper-icon-button {
+  height:100%;
+  border-top:3px solid rgba(0,0,0,0);
+  border-bottom:3px solid rgba(0,0,0,0);
+}
+core-toolbar paper-icon-button[selected=true] {
+  border-bottom:3px solid rgba(255,255,255,0.5);
+}
+core-toolbar paper-icon-button::shadow core-icon {
+  height:100%;
+}
