@@ -191,6 +191,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   }
 
   function drawLine(point) {
+    document.getElementById('3d').classList.remove('retire');
     var lineWidth = strokeConfig['lineWidth'];
     var lineColor = strokeConfig['lineColor'];
     var x = (point.x + 4) / 8 * textureWidth;
@@ -247,6 +248,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
         return false;
       }
 
+      document.getElementById('3d').classList.remove('retire');
       getCurrentContour().push(point);
 
       if (2 <= getCurrentContour().length) {
@@ -290,6 +292,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   }
 
   function clear(reserveMesh) {
+    document.getElementById('3d').classList.add('retire');
     mode = 'pen';
     mouseLastPoint = undefined;
     firstScissorsPoint.position.set(-1000, -1000, -1000);
@@ -382,6 +385,13 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     texture.needsUpdate = true;
   }
 
+  function clearTexture() {
+    textureContext.fillStyle = 'rgb(255,255,255)';
+    textureContext.rect(0, 0, textureWidth, textureHeight);
+    textureContext.fill();
+    texture.needsUpdate = true;
+  }
+
   var mode = 'pen';
   var mouseLastPoint;
   var strokeConfig = {};
@@ -430,12 +440,15 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   });
 
   document.getElementById('clear').addEventListener('click', function() {
-    console.log(document.querySelector('html /deep/ #mesh').checked);
     clear();
   });
 
   document.querySelector('html /deep/ #camera').addEventListener('click', function() {
     takePhoto();
+  });
+
+  document.querySelector('html /deep/ #clear-texture').addEventListener('click', function() {
+    clearTexture();
   });
 
   var meshSwitch = document.querySelector('html /deep/ #mesh');
@@ -461,6 +474,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
       drawing = true;
       strokeConfig['lineWidth'] = document.querySelector('html /deep/ #line-width').value;
       strokeConfig['lineColor'] = document.querySelector('html /deep/ #line-color').selected;
+      if (strokeConfig['lineColor'] === '') strokeConfig['lineColor'] = 'rgb(0,0,255)';
       if (mode === 'pen') drawLine(obj.point);
     });
   });

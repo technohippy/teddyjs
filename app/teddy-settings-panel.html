@@ -89,7 +89,12 @@
       -->
       <div center horizontal layout>
         <div flex>Camera</div>
-        <paper-icon-button id="camera" icon="image:camera-alt" flex></paper-icon-button>
+        <paper-icon-button id="camera" icon="image:camera-alt"></paper-icon-button>
+      </div>
+
+      <div center horizontal layout>
+        <div flex>Clear</div>
+        <paper-icon-button id="clear-texture" icon="clear"></paper-icon-button>
       </div>
     </section>
 
@@ -97,7 +102,7 @@
       <h2>View</h2>
       <div center horizontal layout>
         <div flex>Wireframe</div>
-        <paper-toggle-button id="mesh" class="blue" flex on-trackstart={{cancelBubble}} on-trackx={{cancelBubble}} on-trackend={{cancelBubble}}></paper-toggle-button>
+        <paper-toggle-button id="mesh" class="blue" on-trackstart={{cancelBubble}} on-trackx={{cancelBubble}} on-trackend={{cancelBubble}}></paper-toggle-button>
       </div>
 
       <!--
