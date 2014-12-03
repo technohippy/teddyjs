@@ -292,12 +292,12 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   }
 
   function clear(reserveMesh) {
-    document.getElementById('3d').classList.add('retire');
     mode = 'pen';
     mouseLastPoint = undefined;
     firstScissorsPoint.position.set(-1000, -1000, -1000);
     drawing = false;
     if (typeof reserveMesh === 'undefined') {
+      document.getElementById('3d').classList.add('retire');
       textureContext.fillStyle = 'rgb(255,255,255)';
       textureContext.fillRect(0, 0, textureWidth, textureHeight);
       texture.needsUpdate = true;
