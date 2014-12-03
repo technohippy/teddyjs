@@ -459,9 +459,12 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
         return;
       }
     }, this);
-    if (!hasObj) return;
-    
-    document.getElementById('confirm-dialog').open();
+    if (hasObj) {
+      document.getElementById('confirm-dialog').open();
+    }
+    else {
+      clear();
+    }
   });
 
   document.querySelector('html /deep/ #camera').addEventListener('click', function() {
