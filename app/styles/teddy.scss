@@ -15,10 +15,10 @@ paper-fab {
   bottom:20px;
   right:20px;
   background: #F44336;
-  transition: right 0.4s ease;
+  transition: bottom 0.4s ease;
 }
 paper-fab.retire {
-  right:-60px;
+  bottom:-60px;
 }
 core-drawer-panel:not([narrow]) #navicon {
   display: none;

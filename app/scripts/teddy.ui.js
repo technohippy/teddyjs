@@ -84,23 +84,82 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     }
   }
 
-  function retrieveOutline() {
+  function retrieveOutlines(threshold) {
+    if (typeof threshold === 'undefined') {
+      threshold = function(r,g,b,a) {return r<250 || g<250 || b<250 || a!==255;};
+    }
+
     var imageData = textureContext.getImageData(0, 0, textureWidth, textureHeight);
     var points = [];
+    var table = [];
+    var row;
     var step = 3;
     for (var x = 0; x < textureWidth; x += step) {
+      row = [];
+      table.push(row);
       for (var y = 0; y < textureHeight; y += step) {
         var index = (x + y * textureWidth) * 4;
         var data = imageData.data;
-        if (data[index] !== 255 ||
-            data[index+1] !== 255 ||
-            data[index+2] !== 255 ||
-            data[index+3] !== 255) {
+        if (threshold(data[index], data[index+1], data[index+2], data[index+3])) {
           points.push([x, y]);
+          row.push({pointId:points.length - 1, visited:false});
+        }
+        else {
+          row.push({pointId:null, visited:false});
         }
       }
     }
 
+    var clusters = clusterPoints(points, table);
+    clusters.forEach(function(ps) {
+      retrieveOutline(ps);
+
+      drawing = false;
+      contours.push([]);
+      currentLines = [];
+      mouseLastPoint = undefined;
+    });
+  }
+
+  function clusterPoints(points, table) {
+    var ly = table.length;
+    var lx = table[0].length;
+    var clusters = [];
+    for (var y = 0; y < ly; y++) {
+      var row = table[y];
+      for (var x = 0; x < lx; x++) {
+        var col = row[x];
+        if (col.pointId !== null && !col.visited) {
+          clusters.push([]);
+          checkNeighbors(points, table, clusters.length - 1, clusters, x, y, lx, ly);
+        }
+      }
+    }
+
+    return clusters;
+  }
+
+  function checkNeighbors(points, table, clusterId, clusters, x, y, lx, ly) {
+    var col = table[y][x];
+    if (col.pointId === null || col.visited) return;
+
+    col.visited = true;
+    clusters[clusterId].push(points[col.pointId]);
+    if (1 < x) {
+      checkNeighbors(points, table, clusterId, clusters, x - 1, y, lx, ly);
+    }
+    if (x < lx - 2) {
+      checkNeighbors(points, table, clusterId, clusters, x + 1, y, lx, ly);
+    }
+    if (1 < y) {
+      checkNeighbors(points, table, clusterId, clusters, x, y - 1, lx, ly);
+    }
+    if (y < ly - 2) {
+      checkNeighbors(points, table, clusterId, clusters, x, y + 1, lx, ly);
+    }
+  }
+
+  function retrieveOutline(points) {
     var outline = hull(points, 10);
 
     if (outline.length < 3) return;
@@ -435,7 +494,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
           return;
         }
       });
-      if (!hasOutline) retrieveOutline();
+      if (!hasOutline) retrieveOutlines();
       if (contours.length !== 0 && contours[contours.length - 1] !== 0) {
         make3D();
       }
