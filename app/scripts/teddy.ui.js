@@ -5,7 +5,10 @@ var Teddy = Teddy || {};
 Teddy.UI = {};
 
 Teddy.UI.addTextureCanvas = function(textureWidth, textureHeight) {
-  var canvas = document.createElement('canvas');
+  var canvas = document.getElementById('texture');
+  if (canvas) return canvas;
+
+  canvas = document.createElement('canvas');
   canvas.id = 'texture';
   canvas.style.position = 'absolute';
   canvas.style.top = '-' + textureHeight + 'px';
@@ -224,7 +227,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
         return; // TODO: そもそも登録しないようにする
       }
 
-      var teddy = new Teddy.Body(currentContour, meshSwitch.checked);
+      var teddy = new Teddy.Body(currentContour, meshSwitch.checked); // TODO: reconsider about the second argument
       teddy.getMeshAsync(function() {
         currentMesh = teddy.mesh;
         var geometry = currentMesh.geometry;
@@ -451,6 +454,56 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     texture.needsUpdate = true;
   }
 
+  function saveLocal(modelName) {
+    if (typeof modelName === 'undefined') modelName = 'meshes';
+    if (modelName.indexOf('__teddy__') === 0) return; // TODO: alert
+
+    var models = window.sessionStorage.getItem('__teddy__models');
+    if (!models) models = [];
+    var index = models.indexOf(modelName);
+    if (index < 0) models.splice(index, 1);
+    models.push(modelName);
+    window.sessionStorage.setItem('__teddy__models', models);
+
+    var allMeshes = [];
+    scene.children.forEach(function(child) {
+      if (child instanceof THREE.Mesh && !(child.geometry instanceof THREE.PlaneGeometry)) {
+        allMeshes.push(child);
+      }
+    }, this);
+    var serializedMeshes = allMeshes.map(function(mesh) {
+      return mesh.userData['teddy'].serialize();
+    });
+    window.sessionStorage.setItem(modelName, JSON.stringify(serializedMeshes));
+  }
+
+  function loadLocal(modelName) {
+    var models = window.sessionStorage.getItem('__teddy__models');
+    if (typeof modelName === 'undefined') modelName = models[0];
+    if (models.indexOf(modelName) < 0) return; //TODO: alert
+
+    document.getElementById('3d').classList.remove('retire');
+    var serializedMeshes = JSON.parse(window.sessionStorage.getItem(modelName));
+    var meshLength = serializedMeshes.length;
+    var currentMesh = 0;
+    serializedMeshes.forEach(function(serializedMesh) {
+      Teddy.Body.deserialize(serializedMesh, function(contour, image) {
+        contours.push(contour);
+
+        currentMesh++;
+        if (meshLength <= currentMesh) {
+          canvas.getContext('2d').drawImage(image, 0, 0);
+          texture.needsUpdate = true;
+          make3D();
+        }
+      });
+    });
+  }
+
+  function clearAllLocal() {
+    window.sessionStorage.clear();
+  }
+
   var mode;
   function setMode(val) {
     mode = val;
@@ -532,6 +585,23 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
 
   document.querySelector('html /deep/ #clear-texture').addEventListener('click', function() {
     clearTexture();
+  });
+
+  document.querySelector('html /deep/ #save-local').addEventListener('click', function() {
+    document.getElementById('save-local-dialog').open();
+  });
+
+  document.querySelector('html /deep/ #load-local').addEventListener('click', function() {
+    loadLocal();
+  });
+
+  document.querySelector('html /deep/ #clear-all-local').addEventListener('click', function() {
+    clearAllLocal();
+  });
+
+  document.querySelector('html /deep/ #save-local-dialog paper-button[affirmative]').addEventListener('click', function() {
+    var modelName = document.querySelector('html /deep/ #save-local-dialog paper-input').value;
+    saveLocal(modelName);
   });
 
   var meshSwitch = document.querySelector('html /deep/ #mesh');

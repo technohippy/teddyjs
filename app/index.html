@@ -93,6 +93,12 @@
       <paper-button affirmative>OK</paper-button>
     </paper-action-dialog>
 
+    <paper-action-dialog id="save-local-dialog" heading="Input model name.">
+      <paper-input label="Model Name"></paper-input>
+      <paper-button dismissive autofocus>Cancel</paper-button>
+      <paper-button affirmative>OK</paper-button>
+    </paper-action-dialog>
+
 
     <!-- build:js scripts/vendor.js -->
     <!-- bower:js -->
@@ -138,8 +144,10 @@
 
     <!-- build:js({app,.tmp}) scripts/main.js -->
     <script src="scripts/vendor/hull.js"></script>
+    <script src="scripts/vendor/OBJExporter.js"></script>
     <script src="scripts/teddy.js"></script>
     <script src="scripts/teddy.ui.js"></script>
+    <script src="scripts/teddy.serializer.js"></script>
     <script src="scripts/main.js"></script>
     <!-- endbuild -->
   </body>

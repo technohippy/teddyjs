@@ -61,6 +61,26 @@
     </style>
 
     <section>
+      <h2>View</h2>
+      <div center horizontal layout>
+        <div flex>Wireframe</div>
+        <paper-toggle-button id="mesh" class="blue" on-trackstart={{cancelBubble}} on-trackx={{cancelBubble}} on-trackend={{cancelBubble}}></paper-toggle-button>
+      </div>
+
+      <!--
+      <div center horizontal layout>
+        <div flex>Bumpmap</div>
+        <paper-toggle-button id="bumpmap"></paper-toggle-button>
+      </div>
+
+      <div center horizontal layout>
+        <div flex>Toonshader</div>
+        <paper-toggle-button id="toon"></paper-toggle-button>
+      </div>
+      -->
+    </section>
+
+    <section>
       <h2>Brush</h2>
       <div center horizontal layout>
         <div flex>Width</div>
@@ -101,21 +121,26 @@
     </section>
 
     <section>
-      <h2>View</h2>
+      <h2>Data</h2>
       <div center horizontal layout>
-        <div flex>Wireframe</div>
-        <paper-toggle-button id="mesh" class="blue" on-trackstart={{cancelBubble}} on-trackx={{cancelBubble}} on-trackend={{cancelBubble}}></paper-toggle-button>
+        <div flex>Save</div>
+        <paper-icon-button id="save-local" icon="save"></paper-icon-button>
+      </div>
+
+      <div center horizontal layout>
+        <div flex>Load</div>
+        <paper-icon-button id="load-local" icon="folder-open"></paper-icon-button>
+      </div>
+
+      <div center horizontal layout>
+        <div flex>Clear All</div>
+        <paper-icon-button id="clear-all-local" icon="clear"></paper-icon-button>
       </div>
 
       <!--
       <div center horizontal layout>
-        <div flex>Bumpmap</div>
-        <paper-toggle-button id="bumpmap"></paper-toggle-button>
-      </div>
-
-      <div center horizontal layout>
-        <div flex>Toonshader</div>
-        <paper-toggle-button id="toon"></paper-toggle-button>
+        <div flex>Upload</div>
+        <paper-icon-button id="upload" icon="cloud-upload"></paper-icon-button>
       </div>
       -->
     </section>
