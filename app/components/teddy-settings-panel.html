@@ -130,6 +130,16 @@
       <div center horizontal layout>
         <div flex>Load</div>
         <paper-icon-button id="load-local" icon="folder-open"></paper-icon-button>
+        <paper-dropdown id="local-models-dropdown" style="height:100px; width:100px; right:60px;">
+          <core-selector id="local-models">
+            <div id="model1">model1</div>
+            <div id="model2">model2</div>
+            <div id="model3">model3</div>
+            <template repeat="{{model in models}}">
+              <div id="{{model}}">{{model}}</div>
+            </template>
+          </core-selectoru>
+        </paper-dropdown>
       </div>
 
       <div center horizontal layout>

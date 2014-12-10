@@ -454,16 +454,19 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     texture.needsUpdate = true;
   }
 
+  var STRAGE_RESERVED_PREFIX = '__teddy__';
+  var STRAGE_MODELS_KEY = STRAGE_RESERVED_PREFIX + 'models';
+
   function saveLocal(modelName) {
     if (typeof modelName === 'undefined') modelName = 'meshes';
-    if (modelName.indexOf('__teddy__') === 0) return; // TODO: alert
+    if (modelName.indexOf(STRAGE_RESERVED_PREFIX) === 0) return; // TODO: alert
 
-    var models = window.sessionStorage.getItem('__teddy__models');
+    var models = JSON.parse(window.sessionStorage.getItem(STRAGE_MODELS_KEY));
     if (!models) models = [];
     var index = models.indexOf(modelName);
-    if (index < 0) models.splice(index, 1);
+    if (0 <= index) models.splice(index, 1);
     models.push(modelName);
-    window.sessionStorage.setItem('__teddy__models', models);
+    window.sessionStorage.setItem(STRAGE_MODELS_KEY, JSON.stringify(models));
 
     var allMeshes = [];
     scene.children.forEach(function(child) {
@@ -478,7 +481,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   }
 
   function loadLocal(modelName) {
-    var models = window.sessionStorage.getItem('__teddy__models');
+    var models = JSON.parse(window.sessionStorage.getItem(STRAGE_MODELS_KEY));
     if (typeof modelName === 'undefined') modelName = models[0];
     if (models.indexOf(modelName) < 0) return; //TODO: alert
 
@@ -592,7 +595,17 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   });
 
   document.querySelector('html /deep/ #load-local').addEventListener('click', function() {
-    loadLocal();
+    var dialog = document.querySelector('load-model-dialog');
+    dialog.modelNames = JSON.parse(window.sessionStorage.getItem(STRAGE_MODELS_KEY));
+    dialog.open();
+  });
+
+  document.querySelector('load-model-dialog /deep/ [affirmative]').addEventListener('click', function() {
+    var selector = document.querySelector('load-model-dialog /deep/ #local-models');
+    if (selector.selected) {
+      clear();
+      loadLocal(selector.selected);
+    }
   });
 
   document.querySelector('html /deep/ #clear-all-local').addEventListener('click', function() {

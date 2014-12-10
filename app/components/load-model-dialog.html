@@ -1,0 +1,49 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-shadow/paper-shadow.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog-base.html">
+
+<polymer-element name="load-model-dialog" extends="paper-dialog-base">
+  <template>
+    <style>
+    :host {
+      background: #fff;
+      color: rgba(0, 0, 0, 0.87);
+      margin: 32px;
+      overflow: visible !important;
+    }
+    h1 {
+      font-size: 20px;
+    }
+    #scroller {
+      overflow: auto;
+      box-sizing: border-box;
+      padding: 24px 24px 0 24px;
+    }
+    #actions {
+      padding: 16px;
+    }
+    [active] {
+      font-weight:bold;
+    }
+    </style>
+    <paper-shadow z="3" fit></paper-shadow>
+    <div id="scroller" relative flex auto>
+      <h1>Choose model name.</h1>
+      <core-selector id="local-models" valueattr="id">
+        <template repeat="{{modelName in modelNames}}">
+          <div id="{{modelName}}">{{modelName}}</div>
+        </template>
+      </core-selectoru>
+    </div>
+    <div id="actions" relative layout horizontal>
+      <paper-button on-click="{{close}}" dismissive autofocus>Cancel</paper-button>
+      <div flex></div>
+      <paper-button on-click="{{close}}" affirmative>OK</paper-button>
+    </div>
+  </template>
+  <script>
+  Polymer({
+    modelNames: []
+  });
+  </script>
+</polymer-element>
