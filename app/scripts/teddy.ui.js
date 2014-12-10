@@ -454,19 +454,8 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     texture.needsUpdate = true;
   }
 
-  var STRAGE_RESERVED_PREFIX = '__teddy__';
-  var STRAGE_MODELS_KEY = STRAGE_RESERVED_PREFIX + 'models';
-
   function saveLocal(modelName) {
-    if (typeof modelName === 'undefined') modelName = 'meshes';
-    if (modelName.indexOf(STRAGE_RESERVED_PREFIX) === 0) return; // TODO: alert
-
-    var models = JSON.parse(window.sessionStorage.getItem(STRAGE_MODELS_KEY));
-    if (!models) models = [];
-    var index = models.indexOf(modelName);
-    if (0 <= index) models.splice(index, 1);
-    models.push(modelName);
-    window.sessionStorage.setItem(STRAGE_MODELS_KEY, JSON.stringify(models));
+    if (Teddy.Storage.isReservedKey(modelName)) return; // TODO: alert
 
     var allMeshes = [];
     scene.children.forEach(function(child) {
@@ -474,37 +463,25 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
         allMeshes.push(child);
       }
     }, this);
-    var serializedMeshes = allMeshes.map(function(mesh) {
-      return mesh.userData['teddy'].serialize();
-    });
-    window.sessionStorage.setItem(modelName, JSON.stringify(serializedMeshes));
+    Teddy.Storage.setModel(modelName, allMeshes);
+    Teddy.Storage.addModelName(modelName);
   }
 
   function loadLocal(modelName) {
-    var models = JSON.parse(window.sessionStorage.getItem(STRAGE_MODELS_KEY));
-    if (typeof modelName === 'undefined') modelName = models[0];
-    if (models.indexOf(modelName) < 0) return; //TODO: alert
+    if (Teddy.Storage.hasModel(modelName)) return; //TODO: alert
 
     document.getElementById('3d').classList.remove('retire');
-    var serializedMeshes = JSON.parse(window.sessionStorage.getItem(modelName));
-    var meshLength = serializedMeshes.length;
-    var currentMesh = 0;
-    serializedMeshes.forEach(function(serializedMesh) {
-      Teddy.Body.deserialize(serializedMesh, function(contour, image) {
-        contours.push(contour);
-
-        currentMesh++;
-        if (meshLength <= currentMesh) {
-          canvas.getContext('2d').drawImage(image, 0, 0);
-          texture.needsUpdate = true;
-          make3D();
-        }
-      });
+    Teddy.Storage.getMesh(modelName, function(contour) {
+      contours.push(contour);
+    }, function(image) {
+      canvas.getContext('2d').drawImage(image, 0, 0);
+      texture.needsUpdate = true;
+      make3D();
     });
   }
 
   function clearAllLocal() {
-    window.sessionStorage.clear();
+    Teddy.Storage.clearAll();
   }
 
   var mode;
@@ -596,7 +573,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
 
   document.querySelector('html /deep/ #load-local').addEventListener('click', function() {
     var dialog = document.querySelector('load-model-dialog');
-    dialog.modelNames = JSON.parse(window.sessionStorage.getItem(STRAGE_MODELS_KEY));
+    dialog.modelNames = Teddy.Storage.getModels();
     dialog.open();
   });
 
