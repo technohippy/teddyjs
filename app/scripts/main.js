@@ -27,9 +27,6 @@ function main() {
 
   var renderer = new THREE.WebGLRenderer({antialias:true});
   renderer.setSize(window.getContentWidth(), window.getContentHeight());
-  //renderer.setClearColor(0x333366);
-  //renderer.setClearColor(0x3f51b5);
-  //renderer.setClearColor(0xc5cae6);
   renderer.setClearColor(0x1A237E);
   renderer.sortObjects = false;
   document.querySelector('content').appendChild(renderer.domElement);
@@ -46,16 +43,6 @@ function main() {
     camera.aspect = window.getContentWidth() / window.getContentHeight();
     camera.updateProjectionMatrix();
   }, false);
-
-  document.addEventListener('keyup', function(event) {
-    if (event.keyCode === 77) {
-      if (typeof Teddy.Body.instances !== 'undefined') {
-        Teddy.Body.instances.forEach(function(body) {
-          body.material.wireframe = !body.material.wireframe;
-        }, this);
-      }
-    }
-  });
 }
 
 window.addEventListener('polymer-ready', function() {

@@ -4,6 +4,7 @@ var Teddy = Teddy || {};
 
 Teddy.Storage = {};
 
+Teddy.Storage.SERIARIZE_VERSION = '1';
 Teddy.Storage.RESERVED_PREFIX = '__teddy__';
 Teddy.Storage.MODELS_KEY = Teddy.Storage.RESERVED_PREFIX + 'models';
 
@@ -24,11 +25,12 @@ Teddy.Storage.setModel = function(modelName, meshes) {
   var serializedMeshes = meshes.map(function(mesh) {
     return mesh.userData['teddy'].serialize();
   });
+  serializedMeshes.unshift(Teddy.Storage.SERIARIZE_VERSION);
   window.localStorage.setItem(modelName, JSON.stringify(serializedMeshes));
 };
 
 Teddy.Storage.getModels = function() {
-  return JSON.parse(window.localStorage.getItem(Teddy.Storage.MODELS_KEY));
+  return JSON.parse(window.localStorage.getItem(Teddy.Storage.MODELS_KEY)) || [];
 };
 
 Teddy.Storage.hasModel = function(modelName) {
@@ -40,6 +42,7 @@ Teddy.Storage.hasModel = function(modelName) {
 
 Teddy.Storage.getMesh = function(modelName, contourHandler, imageHandler) {
   var serializedMeshes = JSON.parse(window.localStorage.getItem(modelName));
+  if (typeof serializedMeshes[0] === 'string') serializedMeshes.shift(); // remove version
   var meshLength = serializedMeshes.length;
   var currentMeshCount = 0;
   serializedMeshes.forEach(function(serializedMesh) {

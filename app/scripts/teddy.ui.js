@@ -568,19 +568,27 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   });
 
   document.querySelector('html /deep/ #save-local').addEventListener('click', function() {
-    document.getElementById('save-local-dialog').open();
+    if (document.querySelector('core-overlay-layer.core-opened')) return;
+
+    var dialog = document.getElementById('save-local-dialog');
+    if (dialog) dialog.open();
   });
 
   document.querySelector('html /deep/ #load-local').addEventListener('click', function() {
+    if (document.querySelector('core-overlay-layer.core-opened')) return;
+
     var dialog = document.querySelector('load-model-dialog');
+    if (!dialog) return;
     dialog.modelNames = Teddy.Storage.getModels();
+    if (dialog.modelNames.length === 0) return;
     dialog.open();
   });
 
   document.querySelector('load-model-dialog /deep/ [affirmative]').addEventListener('click', function() {
     var selector = document.querySelector('load-model-dialog /deep/ #local-models');
-    if (selector.selected) {
+    if (selector && selector.selected) {
       clear();
+      document.querySelector('core-drawer-panel').selected = 'main';
       loadLocal(selector.selected);
     }
   });
@@ -589,9 +597,12 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     clearAllLocal();
   });
 
-  document.querySelector('html /deep/ #save-local-dialog paper-button[affirmative]').addEventListener('click', function() {
-    var modelName = document.querySelector('html /deep/ #save-local-dialog paper-input').value;
-    saveLocal(modelName);
+  document.querySelector('html /deep/ #save-local-dialog [affirmative]').addEventListener('click', function() {
+    var input = document.querySelector('html /deep/ #save-local-dialog paper-input');
+    if (!input) return;
+
+    var modelName = input.value;
+    if (modelName !== '') saveLocal(modelName);
   });
 
   var meshSwitch = document.querySelector('html /deep/ #mesh');
@@ -675,5 +686,13 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
         }
       }
     });
+  });
+
+  document.querySelector('settings-panel').addEventListener('mousemove', function(event) {
+    event.cancelBubble = true;
+  });
+
+  document.querySelector('settings-panel').addEventListener('touchmove', function(event) {
+    event.cancelBubble = true;
   });
 };
