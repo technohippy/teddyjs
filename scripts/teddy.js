@@ -444,7 +444,7 @@ Teddy.Body.prototype.buildMesh = function() {
   geometry.computeVertexNormals();
 
   this.mesh = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial({color: 0xffffff, wireframe:false}));
-  this.mesh.userData = this;
+  this.mesh.userData['teddy'] = this;
 };
 
 Teddy.Body.prototype.smoothMesh = function() {
@@ -516,6 +516,7 @@ Teddy.Body.prototype.getMeshAsync = function(successHandler, errorHandler, after
         }
 
         this.mesh = new THREE.Mesh(geometry, this.material);
+        this.mesh.userData['teddy'] = this;
         successHandler(this);
         afterHandler(this);
       }
