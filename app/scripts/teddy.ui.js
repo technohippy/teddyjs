@@ -4,7 +4,7 @@ var Teddy = Teddy || {};
 
 Teddy.UI = {};
 
-Teddy.UI.addTextureCanvas = function(textureWidth, textureHeight) {
+Teddy.UI.getTextureCanvas = function(textureWidth, textureHeight) {
   var canvas = document.getElementById('texture');
   if (canvas) return canvas;
 
@@ -28,7 +28,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   controls.enabled = false;
   var textureWidth = 600;
   var textureHeight = 600;
-  var canvas = Teddy.UI.addTextureCanvas(textureWidth, textureHeight);
+  var canvas = Teddy.UI.getTextureCanvas(textureWidth, textureHeight);
   var textureContext = canvas.getContext('2d');
   var texture = new THREE.Texture(canvas);
   texture.needsUpdate = true;
@@ -565,6 +565,35 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
 
   document.querySelector('html /deep/ #clear-texture').addEventListener('click', function() {
     clearTexture();
+  });
+
+  document.querySelector('html /deep/ #download-obj').addEventListener('click', function() {
+    // TODO: このallMeshesたくさん出てくるのであとでまとめる
+    var allMeshes = [];
+    scene.children.forEach(function(child) {
+      if (child instanceof THREE.Mesh && !(child.geometry instanceof THREE.PlaneGeometry)) {
+        allMeshes.push(child);
+      }
+    }, this);
+
+    var obj = 'mtllib texture.mtl\n' +
+              'usemtl texture\n' + 
+              new THREE.OBJExporter().parse(allMeshes[0].geometry);
+    var mtl = 'newmtl texture\n' +
+              'Ka 0.25000 0.25000 0.25000\n' +
+              'Kd 1.00000 1.00000 1.00000\n' +
+              'Ks 1.00000 1.00000 1.00000\n' +
+              'Ns 5.00000\n' +
+              'map_Kd images/texture.jpg';
+    var imgData = Teddy.UI.getTextureCanvas().toDataURL('image/jpeg', 1.0);
+
+    var zip = new JSZip();
+    zip.file("mesh.obj", obj);
+    zip.file("texture.mtl", mtl);
+    var img = zip.folder("images");
+    img.file("texture.jpg", imgData.substring('data:image/jpeg;base64,'.length), {base64: true});
+    var content = zip.generate({type:"blob"});
+    saveAs(content, "object.zip");
   });
 
   document.querySelector('html /deep/ #save-local').addEventListener('click', function() {
