@@ -1,9 +1,31 @@
 'use strict';
-//var exporter = new THREE.OBJExporter();
 
 Teddy.SERIALIZER_VERSION = '0.1';
 
 Teddy.Serializer = function() {
+};
+
+Teddy.Serializer.zipMeshes = function(meshes) {
+  var zip = new JSZip();
+  meshes.forEach(function(mesh, i) {
+    var obj = 'mtllib texture.mtl\n' +
+              'usemtl texture\n' + 
+              new THREE.OBJExporter().parse(mesh.geometry, 5.0);
+    zip.file("mesh" + i + ".obj", obj);
+  }, this);
+
+  var mtl = 'newmtl texture\n' +
+            'Ka 0.25000 0.25000 0.25000\n' +
+            'Kd 1.00000 1.00000 1.00000\n' +
+            'Ks 1.00000 1.00000 1.00000\n' +
+            'Ns 5.00000\n' +
+            'map_Kd images/texture.jpg';
+  zip.file("texture.mtl", mtl);
+
+  var imgData = Teddy.UI.getTextureCanvas().toDataURL('image/jpeg', 1.0);
+  var img = zip.folder("images");
+  img.file("texture.jpg", imgData.substring('data:image/jpeg;base64,'.length), {base64: true});
+  return zip;
 };
 
 Teddy.Serializer.prototype.serialize = function(body) {
@@ -41,6 +63,10 @@ Teddy.Serializer.prototype.deserialize = function(json, successHandler) {
   };
   image.src = json.texture;
 };
+
+//
+
+Teddy.zipMeshes = Teddy.Serializer.zipMeshes;
 
 Teddy.Body.serializer = new Teddy.Serializer();
 

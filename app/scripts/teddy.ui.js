@@ -486,29 +486,6 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     Teddy.Storage.clearAll();
   }
 
-  function zipMeshesAsObjMtl() {
-    var zip = new JSZip();
-    getAllMeshes().forEach(function(mesh, i) {
-      var obj = 'mtllib texture.mtl\n' +
-                'usemtl texture\n' + 
-                new THREE.OBJExporter().parse(mesh.geometry, 5.0);
-      zip.file("mesh" + i + ".obj", obj);
-    }, this);
-
-    var mtl = 'newmtl texture\n' +
-              'Ka 0.25000 0.25000 0.25000\n' +
-              'Kd 1.00000 1.00000 1.00000\n' +
-              'Ks 1.00000 1.00000 1.00000\n' +
-              'Ns 5.00000\n' +
-              'map_Kd images/texture.jpg';
-    zip.file("texture.mtl", mtl);
-
-    var imgData = Teddy.UI.getTextureCanvas().toDataURL('image/jpeg', 1.0);
-    var img = zip.folder("images");
-    img.file("texture.jpg", imgData.substring('data:image/jpeg;base64,'.length), {base64: true});
-    return zip;
-  }
-
   var mode;
   function setMode(val) {
     mode = val;
@@ -593,7 +570,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   });
 
   document.querySelector('html /deep/ #download-obj').addEventListener('click', function() {
-    var zip = zipMeshesAsObjMtl();
+    var zip = Teddy.zipMeshes(getAllMeshes());
     var content = zip.generate({type:"blob"});
     saveAs(content, "object.zip");
   });
