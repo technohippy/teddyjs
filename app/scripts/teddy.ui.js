@@ -353,6 +353,16 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     return false;
   }
 
+  function getAllMeshes() {
+    var allMeshes = [];
+    scene.children.forEach(function(child) {
+      if (child instanceof THREE.Mesh && !(child.geometry instanceof THREE.PlaneGeometry)) {
+        allMeshes.push(child);
+      }
+    }, this);
+    return allMeshes;
+  }
+
   function clear(reserveMesh) {
     setMode('pen');
     mouseLastPoint = undefined;
@@ -377,13 +387,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   }
 
   function clearMeshes() {
-    var allMeshes = [];
-    scene.children.forEach(function(child) {
-      if (child instanceof THREE.Mesh && !(child.geometry instanceof THREE.PlaneGeometry)) {
-        allMeshes.push(child);
-      }
-    }, this);
-    allMeshes.forEach(function(mesh) {scene.remove(mesh);});
+    getAllMeshes().forEach(function(mesh) {scene.remove(mesh);});
   }
 
   function clearLines() {
@@ -457,13 +461,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   function saveLocal(modelName) {
     if (Teddy.Storage.isReservedKey(modelName)) return; // TODO: alert
 
-    var allMeshes = [];
-    scene.children.forEach(function(child) {
-      if (child instanceof THREE.Mesh && !(child.geometry instanceof THREE.PlaneGeometry)) {
-        allMeshes.push(child);
-      }
-    }, this);
-    Teddy.Storage.setModel(modelName, allMeshes);
+    Teddy.Storage.setModel(modelName, getAllMeshes());
     Teddy.Storage.addModelName(modelName);
   }
 
@@ -482,6 +480,29 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
 
   function clearAllLocal() {
     Teddy.Storage.clearAll();
+  }
+
+  function zipMeshesAsObjMtl() {
+    var zip = new JSZip();
+    getAllMeshes().forEach(function(mesh, i) {
+      var obj = 'mtllib texture.mtl\n' +
+                'usemtl texture\n' + 
+                new THREE.OBJExporter().parse(mesh.geometry);
+      zip.file("mesh" + i + ".obj", obj);
+    }, this);
+
+    var mtl = 'newmtl texture\n' +
+              'Ka 0.25000 0.25000 0.25000\n' +
+              'Kd 1.00000 1.00000 1.00000\n' +
+              'Ks 1.00000 1.00000 1.00000\n' +
+              'Ns 5.00000\n' +
+              'map_Kd images/texture.jpg';
+    zip.file("texture.mtl", mtl);
+
+    var imgData = Teddy.UI.getTextureCanvas().toDataURL('image/jpeg', 1.0);
+    var img = zip.folder("images");
+    img.file("texture.jpg", imgData.substring('data:image/jpeg;base64,'.length), {base64: true});
+    return zip;
   }
 
   var mode;
@@ -568,30 +589,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   });
 
   document.querySelector('html /deep/ #download-obj').addEventListener('click', function() {
-    // TODO: このallMeshesたくさん出てくるのであとでまとめる
-    var allMeshes = [];
-    scene.children.forEach(function(child) {
-      if (child instanceof THREE.Mesh && !(child.geometry instanceof THREE.PlaneGeometry)) {
-        allMeshes.push(child);
-      }
-    }, this);
-
-    var obj = 'mtllib texture.mtl\n' +
-              'usemtl texture\n' + 
-              new THREE.OBJExporter().parse(allMeshes[0].geometry);
-    var mtl = 'newmtl texture\n' +
-              'Ka 0.25000 0.25000 0.25000\n' +
-              'Kd 1.00000 1.00000 1.00000\n' +
-              'Ks 1.00000 1.00000 1.00000\n' +
-              'Ns 5.00000\n' +
-              'map_Kd images/texture.jpg';
-    var imgData = Teddy.UI.getTextureCanvas().toDataURL('image/jpeg', 1.0);
-
-    var zip = new JSZip();
-    zip.file("mesh.obj", obj);
-    zip.file("texture.mtl", mtl);
-    var img = zip.folder("images");
-    img.file("texture.jpg", imgData.substring('data:image/jpeg;base64,'.length), {base64: true});
+    var zip = zipMeshesAsObjMtl();
     var content = zip.generate({type:"blob"});
     saveAs(content, "object.zip");
   });
