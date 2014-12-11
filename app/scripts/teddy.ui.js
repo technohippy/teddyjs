@@ -470,7 +470,11 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
 
     document.getElementById('3d').classList.remove('retire');
     Teddy.Storage.getMesh(modelName, function(contour) {
-      contours.push(contour);
+      //contours.push(contour);
+      contours.push([]);
+      contour.forEach(function(point) {
+        cutLine(new THREE.Vector3().copy(point));
+      });
     }, function(image) {
       canvas.getContext('2d').drawImage(image, 0, 0);
       texture.needsUpdate = true;
@@ -487,7 +491,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     getAllMeshes().forEach(function(mesh, i) {
       var obj = 'mtllib texture.mtl\n' +
                 'usemtl texture\n' + 
-                new THREE.OBJExporter().parse(mesh.geometry);
+                new THREE.OBJExporter().parse(mesh.geometry, 5.0);
       zip.file("mesh" + i + ".obj", obj);
     }, this);
 

@@ -8,14 +8,15 @@ THREE.OBJExporter.prototype = {
 
 	constructor: THREE.OBJExporter,
 
-	parse: function ( geometry ) {
+	parse: function ( geometry, scale ) {
 
+		if ( scale === undefined ) scale = 1.0;
 		var output = '';
 
 		for ( var i = 0, l = geometry.vertices.length; i < l; i ++ ) {
 
 			var vertex = geometry.vertices[ i ];
-			output += 'v ' + vertex.x + ' ' + vertex.y + ' ' + vertex.z + '\n';
+			output += 'v ' + (vertex.x * scale) + ' ' + (vertex.y * scale) + ' ' + (vertex.z * scale) + '\n';
 
 		}
 
