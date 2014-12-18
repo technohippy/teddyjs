@@ -592,7 +592,9 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     dialog.open();
   });
 
-  document.querySelector('html /deep/ #merge-bodies').addEventListener('click', function() {
+
+  //document.querySelector('html /deep/ #merge-bodies').addEventListener('click', function() {
+  window.addEventListener('keypress', function(event) { if (event.charCode !== 109) return;
     var meshes = getAllMeshes();
     if (meshes < 2) return;
 
