@@ -592,6 +592,22 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     dialog.open();
   });
 
+  document.querySelector('html /deep/ #merge-bodies').addEventListener('click', function() {
+    var meshes = getAllMeshes();
+    if (meshes < 2) return;
+
+    var bsps = meshes.map(function(mesh) {return new ThreeBSP(mesh);});
+    var bsp = bsps.pop();
+    while (0 < bsps.length) {
+      bsp = bsp.union(bsps.pop());
+    }
+    var unitedMesh = bsp.toMesh(meshes[0].material);
+    unitedMesh.geometry.computeVertexNormals();
+    scene.add(unitedMesh);
+
+    meshes.forEach(function(mesh) {scene.remove(mesh);});
+  });
+
   document.querySelector('load-model-dialog /deep/ [affirmative]').addEventListener('click', function() {
     var selector = document.querySelector('load-model-dialog /deep/ #local-models');
     if (selector && selector.selected) {
