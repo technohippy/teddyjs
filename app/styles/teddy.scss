@@ -55,3 +55,15 @@ core-toolbar paper-icon-button[selected=true] {
 core-toolbar paper-icon-button::shadow core-icon {
   height:100%;
 }
+#file-menu {
+  position:absolute;
+  top:53px;
+  right:10px;
+  width:200px;
+  color:black;
+}
+#file-menu hr {
+  margin-top:5px;
+  margin-bottom:5px;
+  border-top:1px solid gray;
+}

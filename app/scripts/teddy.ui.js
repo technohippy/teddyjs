@@ -512,6 +512,11 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     currentLines = [];
   });
 
+  document.getElementById('more-menu').addEventListener('click', function() {
+    var menu = document.getElementById('file-menu');
+    menu.toggle();
+  });
+
   document.getElementById('3d').addEventListener('click', function() {
     if (paper.material.opacity === 0) {
       clear(true);
@@ -569,20 +574,31 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     clearTexture();
   });
 
-  document.querySelector('html /deep/ #download-obj').addEventListener('click', function() {
+  function closeFileMenu(target) {
+    setTimeout(function() {
+      target.classList.remove('core-selected');
+      target.removeAttribute('active');
+      document.querySelector('#file-menu').close();
+    }, 100);
+  }
+
+  document.querySelector('html /deep/ #download-obj').addEventListener('click', function(event) {
+    closeFileMenu(event.target);
     var zip = Teddy.zipMeshes(getAllMeshes());
     var content = zip.generate({type:"blob"});
     saveAs(content, "object.zip");
   });
 
   document.querySelector('html /deep/ #save-local').addEventListener('click', function() {
+    closeFileMenu(event.target);
     if (document.querySelector('core-overlay-layer.core-opened')) return;
 
     var dialog = document.getElementById('save-local-dialog');
     if (dialog) dialog.open();
   });
 
-  document.querySelector('html /deep/ #load-local').addEventListener('click', function() {
+  document.querySelector('html /deep/ #load-local').addEventListener('click', function(event) {
+    closeFileMenu(event.target);
     if (document.querySelector('core-overlay-layer.core-opened')) return;
 
     var dialog = document.querySelector('load-model-dialog');
@@ -619,7 +635,8 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     }
   });
 
-  document.querySelector('html /deep/ #clear-all-local').addEventListener('click', function() {
+  document.querySelector('html /deep/ #clear-all-local').addEventListener('click', function(event) {
+    closeFileMenu(event.target);
     clearAllLocal();
   });
 
