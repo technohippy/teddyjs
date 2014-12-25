@@ -46,7 +46,7 @@ Teddy.Serializer.zipMeshesAsStl = function(meshes) {
     traverse: function(visitor) {
       meshes.forEach(visitor);
     }
-  });
+  }, 5.0);
   zip.file("mesh.stl", stl);
   return zip;
 };

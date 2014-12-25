@@ -14,8 +14,9 @@ THREE.STLExporter.prototype = {
 		var vector = new THREE.Vector3();
 		var normalMatrixWorld = new THREE.Matrix3();
 
-		return function ( scene ) {
+		return function ( scene, scale ) {
 
+			if ( scale === undefined ) scale = 1.0;
 			var output = '';
 
 			output += 'solid exported\n';
@@ -49,7 +50,7 @@ THREE.STLExporter.prototype = {
 
 								vector.copy( vertices[ indices[ j ] ] ).applyMatrix4( matrixWorld );
 
-								output += '\t\t\tvertex ' + vector.x + ' ' + vector.y + ' ' + vector.z + '\n';
+								output += '\t\t\tvertex ' + (vector.x * scale) + ' ' + (vector.y * scale) + ' ' + (vector.z * scale) + '\n';
 
 							}
 
