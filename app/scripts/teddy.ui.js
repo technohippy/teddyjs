@@ -584,7 +584,14 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
 
   document.querySelector('html /deep/ #download-obj').addEventListener('click', function(event) {
     closeFileMenu(event.target);
-    var zip = Teddy.zipMeshes(getAllMeshes());
+    var zip = Teddy.zipMeshes(getAllMeshes(), 'obj');
+    var content = zip.generate({type:"blob"});
+    saveAs(content, "object.zip");
+  });
+
+  document.querySelector('html /deep/ #download-stl').addEventListener('click', function(event) {
+    closeFileMenu(event.target);
+    var zip = Teddy.zipMeshes(getAllMeshes(), 'stl');
     var content = zip.generate({type:"blob"});
     saveAs(content, "object.zip");
   });
