@@ -621,16 +621,45 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     var meshes = getAllMeshes();
     if (meshes < 2) return;
 
-    var bsps = meshes.map(function(mesh) {return new ThreeBSP(mesh);});
-    var bsp = bsps.pop();
-    while (0 < bsps.length) {
-      bsp = bsp.union(bsps.pop());
-    }
-    var unitedMesh = bsp.toMesh(meshes[0].material);
-    unitedMesh.geometry.computeVertexNormals();
-    scene.add(unitedMesh);
+    var doAsynchronously = false;
+    if (doAsynchronously) {
+      var worker = new Worker('scripts/csg.worker.js');
+      worker.addEventListener('message', function(event) {
+        if (!event.data.status) return;
 
-    meshes.forEach(function(mesh) {scene.remove(mesh);});
+        var geometryData = event.data.geometry;
+        var geometry = new THREE.Geometry();
+        for (var key in geometryData) {
+          geometry[key] = geometryData[key];
+        }
+        var unitedMesh = new THREE.Mesh(geometry, meshes[0].material);
+        unitedMesh.geometry.computeVertexNormals();
+        scene.add(unitedMesh);
+      });
+
+      worker.postMessage(
+        meshes.map(function(mesh) {
+          return {
+            faces: mesh.geometry.faces,
+            faceVertexUvs: mesh.geometry.faceVertexUvs,
+            vertices: mesh.geometry.vertices
+          };
+        })
+      );
+      meshes.forEach(function(mesh) {scene.remove(mesh);});
+    }
+    else {
+      var bsps = meshes.map(function(mesh) {return new ThreeBSP(mesh);});
+      var bsp = bsps.pop();
+      while (0 < bsps.length) {
+        bsp = bsp.union(bsps.pop());
+      }
+      var unitedMesh = bsp.toMesh(meshes[0].material);
+      unitedMesh.geometry.computeVertexNormals();
+      scene.add(unitedMesh);
+
+      meshes.forEach(function(mesh) {scene.remove(mesh);});
+    }
   });
 
   document.querySelector('load-model-dialog /deep/ [affirmative]').addEventListener('click', function() {

@@ -1,5 +1,6 @@
 'use strict';
-window.ThreeBSP = (function() {
+//window.ThreeBSP = (function() {
+var ThreeBSP = (function() {
 	
 	var ThreeBSP,
 		EPSILON = 1e-5,
@@ -28,7 +29,8 @@ window.ThreeBSP = (function() {
 			this.matrix = new THREE.Matrix4;
 			return this;
 		} else {
-			throw 'ThreeBSP: Given geometry is unsupported';
+			this.matrix = new THREE.Matrix4;
+			//throw 'ThreeBSP: Given geometry is unsupported';
 		}
 	
 		for ( i = 0, _length_i = geometry.faces.length; i < _length_i; i++ ) {
@@ -36,7 +38,8 @@ window.ThreeBSP = (function() {
 			faceVertexUvs = geometry.faceVertexUvs[0][i];
 			polygon = new ThreeBSP.Polygon;
 			
-			if (true || face instanceof THREE.Face3 ) {
+			if ( true ) {
+			//if ( face instanceof THREE.Face3 ) {
 				vertex = geometry.vertices[ face.a ];
                                 uvs = faceVertexUvs ? new THREE.Vector2( faceVertexUvs[0].x, faceVertexUvs[0].y ) : null;
                                 vertex = new ThreeBSP.Vertex( vertex.x, vertex.y, vertex.z, face.vertexNormals[0], uvs );
