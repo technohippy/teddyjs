@@ -1,0 +1,53 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-shadow/paper-shadow.html">
+<link rel="import" href="../bower_components/paper-ripple/paper-ripple.html">
+<link rel="import" href="./color-chooser.html">
+
+<polymer-element name="color-choose-button">
+  <template>
+    <style>
+    :host {
+      width:24px;
+      height:28px;
+      padding:6px 8px;
+    }
+    paper-button {
+      min-width:24px;
+      margin:0;
+      width:24px;
+      height:24px;
+      border-radius:12px;
+      border:2px solid #C8C8C8;
+    }
+    paper-button::shadow .button-content {
+      display:none;
+    }
+    paper-ripple::shadow #waves {
+      display:none;
+    }
+    </style>
+    <paper-button id="button" on-click="{{openColorChooser}}">
+      <paper-ripple fit></paper-ripple>
+    </paper-button>
+  </template>
+  <script>
+  Polymer({
+    ready: function() {
+      this.colorChooser = document.createElement('color-chooser');
+      this.colorChooser.onSubmit = function(event, detail, sender) {
+        this.color = this.colorChooser.color;
+      }.bind(this);
+      this.color = this.colorChooser.colors[0];
+      document.body.appendChild(this.colorChooser);
+    },
+    color: undefined,
+    colorChanged: function() {
+      this.$.button.style.backgroundColor = '#' + this.color;
+    },
+    openColorChooser: function(event, detail, sender) {
+      this.colorChooser.color = this.color;
+      this.colorChooser.open();
+    }
+  });
+  </script>
+</polymer-element>

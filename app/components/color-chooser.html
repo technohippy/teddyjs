@@ -1,0 +1,109 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-shadow/paper-shadow.html">
+<link rel="import" href="../bower_components/paper-ripple/paper-ripple.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog-base.html">
+
+<polymer-element name="color-chooser" extends="paper-dialog-base">
+  <template>
+    <style>
+    :host {
+      background: #fff;
+      color: rgba(0, 0, 0, 0.87);
+      margin: 32px;
+      overflow: visible !important;
+      max-width:380px;
+    }
+    h1 {
+      font-size: 20px;
+    }
+    #scroller {
+      overflow: auto;
+      box-sizing: border-box;
+      padding: 24px 24px 0 24px;
+    }
+    #actions {
+      padding: 16px;
+    }
+    [active] {
+      font-weight:bold;
+    }
+    ul {
+      -webkit-padding-start:0;
+    }
+    li {
+      padding:0;
+      list-style-type:none;
+      display:block;
+      float:left;
+      width:40px;
+      height:40px;
+      margin:5px;
+      border: 1px solid lightGray;
+    }
+    li > paper-button {
+      min-width:40px;
+      margin:0;
+      width:40px;
+      height:40px;
+    }
+    li > paper-button.white {
+      border: 1px solid #EEEEEE;
+    }
+    li > paper-button::shadow .button-content {
+      display:none;
+    }
+    </style>
+    <paper-shadow z="3" fit></paper-shadow>
+    <div id="scroller" relative flex auto>
+      <h1>Choose color.</h1>
+      <ul>
+        <template repeat="{{color in colors}}">
+        <li style="background-color:#{{color}}" value="{{color}}" on-tap="{{onTap}}" relative>
+          <paper-button fit id="colorButton{{color}}" class="{{}}">
+            <paper-ripple fit></paper-ripple>
+          </paper-button>
+        </li>
+        </template>
+      </ul>
+    </div>
+    <div id="actions" relative layout horizontal>
+      <paper-button on-click="{{cancel}}" dismissive autofocus>Cancel</paper-button>
+      <div flex></div>
+      <paper-button on-click="{{submit}}" affirmative>OK</paper-button>
+    </div>
+  </template>
+  <script>
+  Polymer({
+    colors: [
+      'FF0000', 'AA0000', '660000',
+      '00FFFF', '00AAAA', '006666',
+      '00FF00', '00AA00', '006600',
+      'FF00FF', 'AA00AA', '660066',
+      '0000FF', '0000AA', '000066',
+      'FFFF00', 'AAAA00', '666600',
+      '000000', 'FFFFFF'
+    ],
+    color: undefined,
+    colorChanged: function() {
+      this.colors.forEach(function(color) {
+        this.$['colorButton' + color].raised = this.color === color;
+      }, this);
+    },
+    onTap: function(event, detail, sender) {
+      this.color = sender.getAttribute('value');
+    },
+    onCancel: function(event, detail, sender) {
+    },
+    onSubmit: function(event, detail, sender) {
+    },
+    cancel: function(event, detail, sender) {
+      this.onCancel(event, detail, sender);
+      this.close();
+    },
+    submit: function(event, detail, sender) {
+      this.onSubmit(event, detail, sender);
+      this.close();
+    }
+  });
+  </script>
+</polymer-element>

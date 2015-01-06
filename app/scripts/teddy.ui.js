@@ -706,8 +706,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     ifOnPaperDo(event, function(obj) {
       drawing = true;
       strokeConfig['lineWidth'] = document.querySelector('html /deep/ #line-width').value;
-      strokeConfig['lineColor'] = document.querySelector('html /deep/ #line-color').selected;
-      if (strokeConfig['lineColor'] === '') strokeConfig['lineColor'] = 'rgb(0,0,255)';
+      strokeConfig['lineColor'] = document.querySelector('settings-panel').selectedColor;
       if (mode === 'pen') drawLine(obj.point);
     });
   });
@@ -742,8 +741,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     ifOnPaperDo(event.touches[0], function(obj) {
       drawing = true;
       strokeConfig['lineWidth'] = document.querySelector('html /deep/ #line-width').value;
-      strokeConfig['lineColor'] = document.querySelector('html /deep/ #line-color').selected;
-      if (strokeConfig['lineColor'] === '') strokeConfig['lineColor'] = 'rgb(0,0,255)';
+      strokeConfig['lineColor'] = document.querySelector('settings-panel').selectedColor;
       if (mode === 'pen') drawLine(obj.point);
     });
   });

@@ -1,3 +1,6 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="./color-choose-button.html">
+
 <polymer-element name="settings-panel">
   <template>
     <style>
@@ -89,15 +92,7 @@
 
       <div center horizontal layout>
         <div flex>Color</div>
-        <paper-dropdown-menu label="Pen color" style="border-botton: 1px solid white;">
-          <paper-dropdown class="dropdown" style="color:#1A237E;">
-            <core-menu id="line-color" class="menu" valueattr="id" selected="{{selectedColor}}">
-              <template repeat="{{color in colors}}">
-                <paper-item id="{{color.rgb}}">{{color.label}}</paper-item>
-              </template>
-            </core-menu>
-          </paper-dropdown>
-        </paper-dropdown-menu>
+        <color-choose-button id="colorChooseButton"></color-choose-button>
       </div>
     </section>
 
@@ -129,17 +124,10 @@
 
   <script>
   Polymer({
-    selectedColor: '#0000FF',
-    colors: [
-      {'rgb':'#FF0000', 'label':'Red'},
-      {'rgb':'#00FF00', 'label':'Green'},
-      {'rgb':'#0000FF', 'label':'Blue'},
-      {'rgb':'#FFFF00', 'label':'Yellow'},
-      {'rgb':'#FF9900', 'label':'Orange'},
-      {'rgb':'#000000', 'label':'Black'},
-      {'rgb':'#FFFFFF', 'label':'Erase'}
-    ],
-    cancelBubble: function(e) {e.cancelBubble = true;}
+    get selectedColor() {
+      return '#' + (this.$ ? this.$.colorChooseButton.color : '0000FF');
+    },
+    cancelBubble: function(event) {event.cancelBubble = true;}
   });
   </script>
 </polymer-element>
