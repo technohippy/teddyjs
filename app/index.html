@@ -75,10 +75,14 @@
           <span flex>PaintUp</span>
           <paper-icon-button id="pen" icon="create"></paper-icon-button>
           <paper-icon-button id="scissors" icon="content-cut" style=""></paper-icon-button>
+          <!--
           <paper-icon-button id="clear" icon="refresh"></paper-icon-button>
+          -->
           <paper-icon-button id="more-menu" icon="more-vert"></paper-icon-button>
           <paper-dropdown id="file-menu">
             <core-menu>
+              <paper-item id="clear">Clear</paper-item>
+              <hr />
               <paper-item id="save-local">Save to Local</paper-item>
               <paper-item id="load-local">Load from Local</paper-item>
               <paper-item id="clear-all-local">Clear Local Data</paper-item>

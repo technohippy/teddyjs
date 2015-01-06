@@ -550,7 +550,8 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     clear();
   });
 
-  document.getElementById('clear').addEventListener('click', function() {
+  document.getElementById('clear').addEventListener('click', function(event) {
+    closeFileMenu(event.target);
     var hasObj = false;
     scene.children.forEach(function(body) {
       if (body instanceof THREE.Mesh && !(body.geometry instanceof THREE.PlaneGeometry)) {
