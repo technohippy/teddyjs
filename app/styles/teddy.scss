@@ -67,3 +67,6 @@ core-toolbar paper-icon-button::shadow core-icon {
   margin-bottom:5px;
   border-top:1px solid gray;
 }
+html /deep/ #mainContainer {
+  overflow-y:hidden;
+}

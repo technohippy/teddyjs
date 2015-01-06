@@ -26,7 +26,7 @@ function main() {
   scene.add(ambient);
 
   var renderer = new THREE.WebGLRenderer({antialias:true});
-  renderer.setSize(window.getContentWidth(), window.getContentHeight());
+  renderer.setSize(window.getContentWidth(), window.getContentHeight() + 1);
   renderer.setClearColor(0x1A237E);
   renderer.sortObjects = false;
   document.querySelector('content').appendChild(renderer.domElement);
