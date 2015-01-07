@@ -29,7 +29,7 @@ function main() {
   renderer.setSize(window.getContentWidth(), window.getContentHeight() + 1);
   renderer.setClearColor(0x1A237E);
   renderer.sortObjects = false;
-  document.querySelector('content').appendChild(renderer.domElement);
+  document.querySelector('#content').appendChild(renderer.domElement);
 
   (function render() {
     window.requestAnimationFrame(render);
