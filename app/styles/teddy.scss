@@ -70,6 +70,12 @@ html /deep/ #mainContainer {
 }
 
 /* for Firefox */
+core-header-panel #mainContainer {
+  overflow-y:hidden;
+}
+#mainPanel #mainContainer {
+  overflow-y:hidden;
+}
 core-toolbar paper-icon-button core-icon {
   height:100%;
 }
