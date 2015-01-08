@@ -45,6 +45,7 @@ core-toolbar paper-icon-button {
   height:100%;
   border-top:3px solid rgba(0,0,0,0);
   border-bottom:3px solid rgba(0,0,0,0);
+  box-sizing:border-box;
 }
 core-toolbar paper-icon-button[selected=true] {
   border-bottom:3px solid rgba(255,255,255,0.5);
@@ -71,14 +72,4 @@ html /deep/ #mainContainer {
 /* for Firefox */
 core-toolbar paper-icon-button core-icon {
   height:100%;
-}
-paper-radio-button #offRadio {
-  width:16px;
-  height:16px;
-}
-paper-slider #sliderBar {
-  height:18px;
-}
-color-choose-button {
-  width:40px;
 }
