@@ -67,3 +67,18 @@ core-toolbar paper-icon-button::shadow core-icon {
 html /deep/ #mainContainer {
   overflow-y:hidden;
 }
+
+/* for Firefox */
+core-toolbar paper-icon-button core-icon {
+  height:100%;
+}
+paper-radio-button #offRadio {
+  width:16px;
+  height:16px;
+}
+paper-slider #sliderBar {
+  height:18px;
+}
+color-choose-button {
+  width:40px;
+}
