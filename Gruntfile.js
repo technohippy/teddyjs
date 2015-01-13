@@ -310,6 +310,8 @@ module.exports = function (grunt) {
                     dest: '<%= config.dist %>',
                     src: [
                         '*.{ico,png,txt}',
+                        'manifest.json',
+                        'launcher-icon-*.png',
                         '.htaccess',
                         'images/{,*/}*.webp',
                         '{,*/}*.html',
