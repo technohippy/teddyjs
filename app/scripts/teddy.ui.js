@@ -88,6 +88,10 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
   }
 
   function retrieveOutlines(threshold) {
+    function clamp(val, min, max) {
+      return Math.min(max, Math.max(val, min));
+    }
+
     if (typeof threshold === 'undefined') {
       threshold = function(r,g,b,a) {return r<250 || g<250 || b<250 || a!==255;};
     }
@@ -101,10 +105,12 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
       row = [];
       table.push(row);
       for (var y = 0; y < textureHeight; y += step) {
-        var index = (x + y * textureWidth) * 4;
+        var xx = clamp(x + Math.floor(Math.random() * 3) - 1, 0, textureWidth);
+        var yy = clamp(y + Math.floor(Math.random() * 3) - 1, 0, textureHeight);
+        var index = (xx + yy * textureWidth) * 4;
         var data = imageData.data;
         if (threshold(data[index], data[index+1], data[index+2], data[index+3])) {
-          points.push([x, y]);
+          points.push([xx, yy]);
           row.push({pointId:points.length - 1, visited:false});
         }
         else {
@@ -184,11 +190,12 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     }
 
     smoothOutline.forEach(function(point) {
+      var cancelDegCheck = true;
       cutLine(new THREE.Vector3(
         point[0] / textureWidth * 8 - 4,
         (textureHeight - point[1]) * 8 / textureHeight - 4,
         0
-      ));
+      ), cancelDegCheck);
     }, this);
   }
 
@@ -247,7 +254,8 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
       }, function(e) {
         contours[contours.length - 1] = [];
         console.log(e);
-        document.getElementById('alert-dialog').open();
+        var alertDialog = document.getElementById('alert-dialog');
+        if (alertDialog) alertDialog.open();
       }, checkMaking);
     }, this);
   }
@@ -281,7 +289,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
     }
   }
 
-  function cutLine(point) {
+  function cutLine(point, cancelDegCheck) {
     if (getCurrentContour().length === 0) {
       firstScissorsPoint.position.copy(point).setZ(0.2);
     }
@@ -295,7 +303,7 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
         var p01 = point.clone().sub(getCurrentContour()[getCurrentContour().length - 1]);
         var p02 = point.clone().sub(getCurrentContour()[getCurrentContour().length - 2]);
         var deg = Math.acos(p01.dot(p02) / p01.length() / p02.length()) / Math.PI * 180;
-        if (deg < 1) {
+        if (deg < (cancelDegCheck ? 0.3 : 1)) {
           scene.remove(currentLines.pop());
           getCurrentContour().pop();
         }
