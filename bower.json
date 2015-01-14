@@ -9,7 +9,8 @@
     "paper-elements": "Polymer/paper-elements#~0.5.1",
     "jszip": "Stuk/jszip#~2.4.0",
     "three.js": "*",
-    "three.js-controls": "~0.0.67"
+    "three.js-controls": "~0.0.67",
+    "font-roboto": "Polymer/font-roboto#~0.5.2"
   },
   "devDependencies": {}
 }
