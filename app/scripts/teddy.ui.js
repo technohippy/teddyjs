@@ -5,7 +5,14 @@ var Teddy = Teddy || {};
 Teddy.UI = {};
 
 Teddy.UI.getTextureCanvas = function(textureWidth, textureHeight) {
-  var canvas = document.getElementById('texture');
+  var canvas;
+  var canvasNodes = document.getElementsByTagName('canvas');
+  if (canvasNodes) {
+    for (var i = 0, l = canvasNodes.length; i < l; i++) {
+      if (canvasNodes[i].id === 'texture') canvas = canvasNodes[i];
+    }
+  }
+//  var canvas = document.getElementById('texture');
   if (canvas) return canvas;
 
   canvas = document.createElement('canvas');
@@ -105,8 +112,8 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
       row = [];
       table.push(row);
       for (var y = 0; y < textureHeight; y += step) {
-        var xx = clamp(x + Math.floor(Math.random() * 3) - 1, 0, textureWidth);
-        var yy = clamp(y + Math.floor(Math.random() * 3) - 1, 0, textureHeight);
+        var xx = x; //clamp(x + Math.floor(Math.random() * 3) - 1, 0, textureWidth);
+        var yy = y; //clamp(y + Math.floor(Math.random() * 3) - 1, 0, textureHeight);
         var index = (xx + yy * textureWidth) * 4;
         var data = imageData.data;
         if (threshold(data[index], data[index+1], data[index+2], data[index+3])) {
@@ -299,11 +306,13 @@ Teddy.UI.setup = function(scene, renderer, camera, paper) {
 
     if (getCurrentContour().length === 0 || 0.1 < getCurrentContour()[getCurrentContour().length - 1].distanceTo(point)) {
       // avoid collinear
+      //var minDeg = cancelDegCheck ? 0.3 : 1;
+      var minDeg = 1;
       while (2 <= getCurrentContour().length) {
         var p01 = point.clone().sub(getCurrentContour()[getCurrentContour().length - 1]);
         var p02 = point.clone().sub(getCurrentContour()[getCurrentContour().length - 2]);
         var deg = Math.acos(p01.dot(p02) / p01.length() / p02.length()) / Math.PI * 180;
-        if (deg < (cancelDegCheck ? 0.3 : 1)) {
+        if (deg < minDeg) {
           scene.remove(currentLines.pop());
           getCurrentContour().pop();
         }

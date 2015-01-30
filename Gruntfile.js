@@ -320,7 +320,20 @@ module.exports = function (grunt) {
                         'bower_components/polymer/*.*',
                         'bower_components/core-*/*.*',
                         'bower_components/paper-*/*.*',
-                        'bower_components/web-animations-next/{,*/}*.*'
+                        'bower_components/web-animations-next/{,*/}*.*',
+                    ]
+                }]
+            },
+            distBackground: {
+                files: [{
+                    expand: true,
+                    dot: true,
+                    cwd: '<%= config.app %>',
+                    dest: '<%= config.dist %>',
+                    src: [
+                        'background.js',
+                        'scripts/register_background.js',
+                        'bower_components/cache-polyfill/dist/serviceworker-cache-polyfill.js',
                     ]
                 }]
             },
@@ -375,9 +388,23 @@ module.exports = function (grunt) {
                 'imagemin',
                 'svgmin'
             ]
+        },
+
+        vulcanize: {
+            default: {
+                options: {
+                    //csp: true,
+                    //strip: true
+                },
+                files: {
+                    'app/build.html': 'app/index.html'
+                },
+            },
         }
     });
 
+
+    grunt.loadNpmTasks('grunt-vulcanize');
 
     grunt.registerTask('serve', function (target) {
         if (target === 'dist') {
@@ -415,6 +442,7 @@ module.exports = function (grunt) {
 
     grunt.registerTask('build', [
         'clean:dist',
+        //'vulcanize',
         'useminPrepare',
         'concurrent:dist',
         'autoprefixer',
@@ -424,6 +452,7 @@ module.exports = function (grunt) {
         'copy:dist',
         'modernizr',
         'rev',
+        'copy:distBackground',
         'copy:distWorker',
         'usemin',
         'htmlmin'

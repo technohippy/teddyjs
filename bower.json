@@ -10,7 +10,8 @@
     "jszip": "Stuk/jszip#~2.4.0",
     "three.js": "*",
     "three.js-controls": "~0.0.67",
-    "font-roboto": "Polymer/font-roboto#~0.5.2"
+    "font-roboto": "Polymer/font-roboto#~0.5.2",
+    "cache-polyfill": "coonsta/cache-polyfill"
   },
   "devDependencies": {}
 }
