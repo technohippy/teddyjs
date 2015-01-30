@@ -3,7 +3,7 @@
 (function() {
   if (!('serviceWorker' in navigator)) return;
 
-  navigator.serviceWorker.register('/background.js').then(
+  navigator.serviceWorker.register('background.js').then(
     function(registration) { 
       console.log('ServiceWorker registration successful with scope: ', registration.scope);
     },

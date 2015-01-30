@@ -2,13 +2,13 @@ importScripts('bower_components/cache-polyfill/dist/serviceworker-cache-polyfill
 
 var CACHE_NAME = 'paintup-cache-v00';
 var urlsToCache = [
-  '/bower_components/cache-polyfill/dist/serviceworker-cache-polyfill.js',
-  '/',
-  '/index.html',
-  '/scripts/teddy.worker.js',
-  '/bower_components/three.js/three.js',
-  '/bower_components/poly2tri/dist/poly2tri.js',
-  '/scripts/teddy.js',
+  'bower_components/cache-polyfill/dist/serviceworker-cache-polyfill.js',
+  '',
+  'index.html',
+  'scripts/teddy.worker.js',
+  'bower_components/three.js/three.js',
+  'bower_components/poly2tri/dist/poly2tri.js',
+  'scripts/teddy.js',
 ];
 self.addEventListener('install', function(event) {
   console.log('install:' + event);
