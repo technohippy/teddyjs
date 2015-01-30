@@ -1,6 +1,7 @@
 node_modules
 dist
 !bower_components/poly2tri/dist
+!bower_components/cache-polyfill/dist
 .tmp
 .sass-cache
 app/bower_components
