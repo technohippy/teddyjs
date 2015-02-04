@@ -6,7 +6,7 @@ JavaScript Version of [Teddy](http://www-ui.is.s.u-tokyo.ac.jp/~takeo/teddy/tedd
 
 ![Countour to Mesh](http://drive.google.com/uc?export=view&id=0B2NukcLXuVBPallzc2F4bGdOX2s)
 
-The teddy.js allows you to build a 4D mesh from a 2D coutour. Briefly speaking, the mesh-buiding procedure is described below:
+The teddy.js allows you to build a 3D mesh from a 2D coutour. Briefly speaking, the mesh-buiding procedure is described below:
 
 1. Triangulate a countour.
 2. Retrieve a spine.
@@ -15,7 +15,7 @@ The teddy.js allows you to build a 4D mesh from a 2D coutour. Briefly speaking, 
 
 To know about the algorithm in detail, please see [the original paper](http://www-ui.is.s.u-tokyo.ac.jp/~takeo/papers/siggraph99.pdf). 
 
-Note that though the original teddy described in the paper realize some other operation than pumping a countour such as extrusion, cutting and so on, the teddy.js can only pump a 2D figure.
+Note that though the original teddy described in the paper realizes some other operation than pumping a countour such as extrusion, cutting and so on, the teddy.js can only pump a 2D figure.
 
 ## PaintUp
 
