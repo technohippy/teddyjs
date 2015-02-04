@@ -267,7 +267,8 @@ module.exports = function (grunt) {
                 files: [{
                     expand: true,
                     cwd: '<%= config.dist %>',
-                    src: '{,*/}*.html',
+                    //src: '{,*/}*.html',
+                    src: '<%= config.app %>/*.html',
                     dest: '<%= config.dist %>'
                 }]
             }
@@ -321,6 +322,8 @@ module.exports = function (grunt) {
                         'bower_components/core-*/*.*',
                         'bower_components/paper-*/*.*',
                         'bower_components/web-animations-next/{,*/}*.*',
+                        'components/build-all.html',
+                        'components/build-all.js',
                     ]
                 }]
             },
@@ -393,11 +396,11 @@ module.exports = function (grunt) {
         vulcanize: {
             default: {
                 options: {
-                    //csp: true,
-                    //strip: true
+                    csp: true,
+                    strip: true
                 },
                 files: {
-                    'app/build.html': 'app/index.html'
+                    'app/components/build-all.html': 'app/components/all.html'
                 },
             },
         }
@@ -442,7 +445,7 @@ module.exports = function (grunt) {
 
     grunt.registerTask('build', [
         'clean:dist',
-        //'vulcanize',
+        'vulcanize',
         'useminPrepare',
         'concurrent:dist',
         'autoprefixer',
