@@ -23,15 +23,17 @@ https://technohippy.github.io/teddyjs/
 
 ![countour](http://drive.google.com/uc?export=view&id=0B2NukcLXuVBPanhUUDN6UFNqbUE)
 ![pump](http://drive.google.com/uc?export=view&id=0B2NukcLXuVBPU0wyUTB1cnBYTXc)
-![mesh](http://drive.google.com/uc?export=view&id=1B2NukcLXuVBPc0w1QUg4OVRzb00)
+![mesh](http://drive.google.com/uc?export=view&id=0B2NukcLXuVBPc0w1QUg4OVRzb00)
 
 PaintUp is a sample application utilizing teddy.js. You can:
 
-- Build a 3D model from your 2D painging.
+- Build a 3D model from your 2D painting.
 - Download a built 3D model in obj/stl format.
 - Use this on your smartphone.
 
 ### How to Use
+
+I believe you can use this app without any explanation. When you do something then the ``3D'' button appears. Just click the button and wait a while.
 
 ### How to Install
 
