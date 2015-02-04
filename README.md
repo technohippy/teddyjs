@@ -21,6 +21,10 @@ Note that though the original teddy described in the paper realize some other op
 
 https://technohippy.github.io/teddyjs/
 
+![countour](http://drive.google.com/uc?export=view&id=0B2NukcLXuVBPanhUUDN6UFNqbUE)
+![pump](http://drive.google.com/uc?export=view&id=0B2NukcLXuVBPU0wyUTB1cnBYTXc)
+![mesh](http://drive.google.com/uc?export=view&id=0B2NukcLXuVBPc0w1QUg4OVRzb00)
+
 PaintUp! is a sample application utilizing teddy.js. You can:
 
 - Build a 3D model from your 2D painging.
