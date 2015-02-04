@@ -1,4 +1,4 @@
-# Teddy.js/PaintUp!
+# Teddy.js/PaintUp
 
 JavaScript Version of [Teddy](http://www-ui.is.s.u-tokyo.ac.jp/~takeo/teddy/teddy.htm) and a Demo Application for the library
 
@@ -17,15 +17,15 @@ To know about the algorithm in detail, please see [the original paper](http://ww
 
 Note that though the original teddy described in the paper realize some other operation than pumping a countour such as extrusion, cutting and so on, the teddy.js can only pump a 2D figure.
 
-## PaintUp!
+## PaintUp
 
 https://technohippy.github.io/teddyjs/
 
 ![countour](http://drive.google.com/uc?export=view&id=0B2NukcLXuVBPanhUUDN6UFNqbUE)
 ![pump](http://drive.google.com/uc?export=view&id=0B2NukcLXuVBPU0wyUTB1cnBYTXc)
-![mesh](http://drive.google.com/uc?export=view&id=0B2NukcLXuVBPc0w1QUg4OVRzb00)
+![mesh](http://drive.google.com/uc?export=view&id=1B2NukcLXuVBPc0w1QUg4OVRzb00)
 
-PaintUp! is a sample application utilizing teddy.js. You can:
+PaintUp is a sample application utilizing teddy.js. You can:
 
 - Build a 3D model from your 2D painging.
 - Download a built 3D model in obj/stl format.
