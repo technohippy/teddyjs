@@ -37,12 +37,18 @@ Paint ![pen](http://drive.google.com/uc?export=view&id=0B2NukcLXuVBPdGhQTTNrY1By
 
 ### How to Install
 
-If you are using Chrome for Android, you can use the web app like a native app by touching ``Add to home screen'' menu on your chrome browser. The term native app here means:
+If you are using Chrome for Android, you can use the web app like a native app by using "Add to home screen" menu.
+
+![homescreen](http://drive.google.com/uc?export=view&id=0B2NukcLXuVBPR3RPdVl1c3FVN28)
+
+The term "like a native app" here means:
 
 - The application icon exists on the home screen.
 - The application can be used without any address bar.
+- The application can be used off line if the day comes where a Chrome for Android suppots Service Workers.
 
-Additionally if the day comes where a Chrome for Android suppots Service Workers, this app can work off line.
+![icon](http://drive.google.com/uc?export=view&id=0B2NukcLXuVBPT3l1SmdNTl9nN2s)
+![withoutaddress](http://drive.google.com/uc?export=view&id=0B2NukcLXuVBPM1phVy1mRHkxaUU)
 
 ## Author
 
