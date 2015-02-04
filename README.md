@@ -33,7 +33,7 @@ PaintUp is a sample application utilizing teddy.js. You can:
 
 ### How to Use
 
-I believe you can use this app without any explanation. When you do something then the ``3D'' button appears. Just click the button and wait a while.
+Paint ![pen](http://drive.google.com/uc?export=view&id=0B2NukcLXuVBPdGhQTTNrY1Bydmc) or cut ![scissor](http://drive.google.com/uc?export=view&id=0B2NukcLXuVBPc0dmcEVfVmtwY00) the canvas then push 3D button ![3d](http://drive.google.com/uc?export=view&id=0B2NukcLXuVBPRGR4ZHZJT0txWlU). That's all you should do to build a 3D model.
 
 ### How to Install
 
